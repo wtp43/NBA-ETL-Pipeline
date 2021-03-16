@@ -122,7 +122,7 @@ def save_match_data(html_path):
 			df['date'] = df['date'].dt.strftime('%Y%m%d')
 			df['away'] = df['away'].apply(lambda x: team_abbr[x])
 			df['home'] = df['home'].apply(lambda x: team_abbr[x])
-			
+			print(df.columns)
 			if i == 0:
 				df.to_csv(file_path, mode='a',index=False, header=True)
 			else:
@@ -195,11 +195,11 @@ def save_player_data(html_path, match_id):
 		
 			df = pd.concat([df, basic_df], axis = 1)
 			df.rename(columns={'Starters': 'player_name', 'MP': 'sp',
-			'TS%': 'ts_p', 'eFG%': 'efg_p', '3PAr':'3par', 'FTr': 'ftr',
+			'TS%': 'ts_p', 'eFG%': 'efg_p', '3PAr':'three_par', 'FTr': 'ftr',
 			'ORB%': 'orb_p', 'DRB%':'drb_p', 'TRB%': 'trb_p', 'AST%':'ast_p',
 			'STL%': 'stl_p', 'BLK%':'blk_p', 'TOV%': 'tov_p', 'USG%': 'usg_p',
 			'ORtg': 'ortg', 'DRtg':'drtg', 'BPM':'bpm', 'FG': 'fg',
-			'FGA': 'fga', 'FG%': 'fg_p', '3P': '3p', '3PA': '3pa', '3P%': '3p_p',
+			'FGA': 'fga', 'FG%': 'fg_p', '3P': 'three_p', '3PA': 'three_pa', '3P%': 'three_p_p',
 			'FT': 'ft', 'FTA': 'fta', 'FT%': 'ft_p', 'ORB': 'orb',
 			'DRB': 'drb', 'TRB': 'trb', 'AST': 'ast','STL': 'stl',
 			'BLK': 'blk', 'TOV': 'tov', 'PF': 'pf', 'PTS': 'pts', '+/-': 'pm'}, inplace=True)

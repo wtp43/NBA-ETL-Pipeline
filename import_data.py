@@ -4,40 +4,154 @@ import psycopg2
 from psycopg2 import pool
 from psycopg2 import OperationalError, errorcodes, errors, Error
 import sys
+import os
+import logging
+from multiprocessing import Pool, cpu_count, Lock
+import time
+from timeit import default_timer as timer
+
+def init_child(lock_):
+	global lock
+	global conn
+	conn = db_func.get_conn()
+	lock = lock_
 
 
 
-insert_teams_query = \
-	'''INSERT INTO tickers
-		(ticker, exchange)
-		SELECT im.ticker, im.ticker
-		FROM imports as im
+def insert_player_performance(csv_file, ticker, cur):
+	try:
+		headers = ['player_name', 'sp', 'ts_p', 'efg_p', 'three_par', 'ftr', 'orb_p',
+       'drb_p', 'trb_p', 'ast_p', 'stl_p', 'blk_p', 'tov_p', 'usg_p', 'ortg',
+       'drtg', 'bpm', 'team_name', 'starter', 'match_id', 'date', 'fg', 'fga',
+       'fg_p', 'three_p', 'three_pa', 'three_p_p', 'ft', 'fta', 'ft_p', 'orb',
+       'drb', 'trb', 'ast', 'stl', 'blk', 'tov', 'pf', 'pts', 'pm']
+		with open(csv_file, 'r') as f: 
+			next(f)
+			cur.copy_from(f, 'player_performance_imports', columns=headers,sep=',')
+	except Exception as err:
+		raise err
+
+def insert_matches(csv_file, cur):
+	try:
+		headers = ['date', 'away', 'away_pts', 'home', 'home_pts']
+		with open(csv_file, 'r') as f: 
+			next(f)
+			cur.copy_from(f, 'match_imports', columns=headers,sep=',')
+	except Exception as err:
+		raise err
+
+def insert_teams(csv_file, cur):
+	headers = ['symbol', 'name']
+	with open(csv_file, 'r') as f: 
+		next(f)
+		cur.copy_from(f, 'team', columns=headers,sep=',')
+
+def get_match_list_csvs(seasons):
+	try:
+		all_files = []
+		for i in range(len(seasons)):
+			files = ["csv/"+seasons[i] + '/' + f for f in os.listdir("csv/" + seasons[i]) 
+					if (os.path.isfile(os.path.join("csv/"+seasons[i] + '/',f)) and f == 'match_list.csv')]
+			all_files +=files
+	except Exception as err:
+		raise err
+	return all_files
+
+def match_imports_to_match(conn):
+	insert_matches_query = \
+	'''INSERT INTO match
+		(date, away_pts, home_pts, away, home, elevation)
+		SELECT im.date, im.away_pts, im.home_pts,
+			im.away, im.home, im.elevation
+		FROM match_imports as im
 		WHERE NOT EXISTS
 			   (SELECT *
-				FROM tickers AS t, imports as im
-				WHERE t.ticker = im.ticker
-					AND t.exchange = im.exchange);'''
+				FROM match AS m, match_imports as im
+				WHERE m.date = im.date
+					AND m.away = im.away
+					AND m.home = im.home);'''
+	db_func.exec_query(conn, insert_matches_query)
 
+def get_all_matches(conn):
+	try:
+		select_matches_query = \
+		'''SELECT m.date, m.home, m.match_id
+		FROM match as m);'''
+		cursor = conn.cursor()
+		cursor.execute(select_matches_query)
+		return list(cursor.fetchall())
+	except Error as err:
+		conn.rollback()
+		cursor.close()
+		raise err
+
+def mproc_insert_matches(match_list_path):
+	insert_matches(match_list_path, cur)
+
+def get_all_seasons(conn):
+	try:
+		select_matches_query = \
+		'''SELECT year
+		FROM season;'''
+		cur = conn.cursor()
+		cur.execute(select_matches_query)
+		return list(cur.fetchall())
+	except Error as err:
+		conn.rollback()
+		cur.close()
+		raise err
+
+def insert_seasons(conn):
+	try:
+		cur = conn.cursor()
+		seasons = [[i] for i in(range(2005,2022))]
+		cur.executemany('''INSERT INTO season (year)
+							VALUES (%s)
+							ON CONFLICT (year) DO NOTHING;''', seasons)
+	except Error as err:
+		conn.rollback()
+		cur.close()
+		raise err
 
 def main():
 	try:
-		conn = psycopg2.connect(user = db_config.user,
-									password = db_config.password,
-									host = db_config.host,
-									port = db_config.port,
-									database = db_config.database)
-		if(conn):
-			print("Connection created successfully")
-		
+		conn = db_func.get_conn()
 
-		team_list = 'db_src/NBA_Teams.csv'
+		team_list_path = 'db_src/NBA_Teams.csv'
 		cur = conn.cursor()
-		headers = ['symbol', 'name']
-		with open(team_list, 'r') as f: 
-			next(f)
-			cur.copy_from(f, 'team', columns=headers,sep=',')
+		insert_seasons(conn)
+		seasons = get_all_seasons(conn)
 
+		insert_teams(team_list_path,cur)
+		seasons = ['2021']
+		
+		db_func.truncate_imports(conn)
+		match_imports_to_match(conn)
+
+
+		lock = Lock()
+		start = timer()
+
+		pool_size = cpu_count()
+		print(f'starting computations on {pool_size} cores')
+		with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
+			match_list_paths = get_match_list_csvs(seasons)
+			pool.starmap(mproc_insert_matches, match_list_paths)
+			#insert all matches
+			#query all matches for (date, home, match_id)
+			#download all player performance (date + home.html)
+			#insert all player performances
+			#query for features (write func)
+			#aggregate all features into new table used for NN
+
+			#pool.starmap(mproc_job, get_all_matches(conn))
+
+
+		#insert all impor tables
+		
 		conn.commit()
+		end = timer()
+		print(f'elapsed time: {end - start}')
 	except Exception as err:
 		conn = None
 		print(err)

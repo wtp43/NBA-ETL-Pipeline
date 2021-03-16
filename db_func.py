@@ -4,6 +4,16 @@ import db_config
 from psycopg2 import OperationalError, errorcodes, errors, Error
 import sys
 
+def truncate_imports(conn):
+	try:
+		cur = conn.cursor()
+		cur.execute('TRUNCATE TABLE player_performance_imports;')
+		cur.execute('TRUNCATE TABLE match_imports;')
+		#cur.execute('TRUNCATE TABLE team_performance_imports;')
+		cur.close()
+	except Exception as err:
+		raise err
+
 def get_conn():
 	try:
 		# create connection and cursor    
@@ -43,6 +53,9 @@ def exec_query(conn, query):
 		conn.rollback()
 		cursor.close()
 		raise err
+	finally:
+		cursor.close()
+	#Can consider returning cursor, but would have to close in function caller 
 
 
 
