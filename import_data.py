@@ -1,5 +1,6 @@
 import db_func
 import db_config
+import scrape_historical_data as shd
 import psycopg2
 from psycopg2 import pool
 from psycopg2 import OperationalError, errorcodes, errors, Error
@@ -9,6 +10,11 @@ import logging
 from multiprocessing import Pool, cpu_count, Lock
 import time
 from timeit import default_timer as timer
+import traceback
+from datetime import date, datetime
+
+
+DEBUG = False
 
 def init_child(lock_):
 	global lock
@@ -57,53 +63,46 @@ def get_match_list_csvs(seasons):
 		raise err
 	return all_files
 
-def match_imports_to_match(conn):
-	insert_matches_query = \
-	'''INSERT INTO match
-		(date, away_pts, home_pts, away, home, elevation)
-		SELECT im.date, im.away_pts, im.home_pts,
-			im.away, im.home, im.elevation
-		FROM match_imports as im
-		WHERE NOT EXISTS
-			   (SELECT *
-				FROM match AS m, match_imports as im
-				WHERE m.date = im.date
-					AND m.away = im.away
-					AND m.home = im.home);'''
-	db_func.exec_query(conn, insert_matches_query)
+def match_imports_to_match(cur):
+	try:
+		insert_matches_query = \
+		'''INSERT INTO match
+			(date, away_pts, home_pts, away, home, elevation)
+			SELECT im.date, im.away_pts, im.home_pts,
+				im.away, im.home, im.elevation
+			FROM match_imports as im
+			WHERE NOT EXISTS
+				(SELECT *
+					FROM match AS m, match_imports as im
+					WHERE m.date = im.date
+						AND m.away = im.away
+						AND m.home = im.home);'''
+		cur.execute(insert_matches_query)
+	except Error as err:
+		raise err
 
-def get_all_matches(conn):
+def get_all_matches(cur):
 	try:
 		select_matches_query = \
 		'''SELECT m.date, m.home, m.match_id
-		FROM match as m);'''
-		cursor = conn.cursor()
-		cursor.execute(select_matches_query)
-		return list(cursor.fetchall())
+		FROM match as m;'''
+		cur.execute(select_matches_query)
+		return list(cur.fetchall())
 	except Error as err:
-		conn.rollback()
-		cursor.close()
 		raise err
 
-def mproc_insert_matches(match_list_path):
-	insert_matches(match_list_path, cur)
-
-def get_all_seasons(conn):
+def get_all_seasons(cur):
 	try:
 		select_matches_query = \
 		'''SELECT year
 		FROM season;'''
-		cur = conn.cursor()
 		cur.execute(select_matches_query)
 		return list(cur.fetchall())
 	except Error as err:
-		conn.rollback()
-		cur.close()
 		raise err
 
-def insert_seasons(conn):
+def insert_seasons(cur):
 	try:
-		cur = conn.cursor()
 		seasons = [[i] for i in(range(2005,2022))]
 		cur.executemany('''INSERT INTO season (year)
 							VALUES (%s)
@@ -113,21 +112,69 @@ def insert_seasons(conn):
 		cur.close()
 		raise err
 
-def main():
+
+def mproc_insert_matches(season):
+	try:
+		season = season[0]
+		print(season)
+		conn = None
+		conn = db_func.get_conn()
+		with lock:
+			logging.info("DB connection established")
+		with lock:
+			logging.info(season+" season html saved")
+		html_path = 'bs4_html/match_list/' + season + '.html' 
+		shd.save_match_data(html_path)
+		with lock:
+			logging.info(season+" season matches saved to csv")
+
+		cur = conn.cursor()
+		csv_path = 'csv/' + season + '/match_list.csv'
+		insert_matches(csv_path, cur)
+		with lock:
+			logging.info(season +": season matches inserted into match_imports")
+		conn.commit()
+		with lock:
+			logging.info("match table updated with match_imports")	
+		
+	except Exception as err:
+		if conn is not None:
+			conn.rollback()
+		cur = None
+		raise err
+	finally:
+		if conn:
+			conn.close()
+
+def scrape_htmls():
+	return
+
+def run_scraper():
+	if not os.path.isdir("logs"):
+		os.makedirs("logs")
+	logging.basicConfig(level=logging.DEBUG, 
+						format= '[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s',
+     					datefmt='%Y-%m-%d %H:%M:%S',
+						handlers=[
+							logging.FileHandler('logs/'+date.today().strftime("%Y-%m-%d") + '.log'),
+							logging.StreamHandler()])	
+
 	try:
 		conn = db_func.get_conn()
 
 		team_list_path = 'db_src/NBA_Teams.csv'
 		cur = conn.cursor()
-		insert_seasons(conn)
-		seasons = get_all_seasons(conn)
-
+		insert_seasons(cur)
+		seasons = get_all_seasons(cur)
+		seasons = [(str(seasons[i][0]),)for i in range(len(seasons))]
 		insert_teams(team_list_path,cur)
-		seasons = ['2021']
+
+		shd.save_match_htmls(seasons)
+
+		if DEBUG:
+			seasons = [('2021',)]
 		
 		db_func.truncate_imports(conn)
-		match_imports_to_match(conn)
-
 
 		lock = Lock()
 		start = timer()
@@ -135,9 +182,10 @@ def main():
 		pool_size = cpu_count()
 		print(f'starting computations on {pool_size} cores')
 		with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
-			match_list_paths = get_match_list_csvs(seasons)
-			pool.starmap(mproc_insert_matches, match_list_paths)
 			#insert all matches
+			pool.map(mproc_insert_matches, seasons)
+			match_imports_to_match(cur)
+
 			#query all matches for (date, home, match_id)
 			#download all player performance (date + home.html)
 			#insert all player performances
@@ -153,13 +201,16 @@ def main():
 		end = timer()
 		print(f'elapsed time: {end - start}')
 	except Exception as err:
-		conn = None
-		print(err)
+		logging.exception(traceback.print_exception(*sys.exc_info()))
+		sys.exit()
 	finally:
 		if (conn):
 			conn.close()
 			print("PostgreSQL connection is closed")
 
+
+def main():
+	run_scraper()
 
 if __name__ == '__main__':
 	main()

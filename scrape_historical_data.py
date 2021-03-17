@@ -26,29 +26,39 @@ team_abbr = {'Atlanta Hawks':'ATL', 'Boston Celtics' : 'BOS', 'Brooklyn Nets': '
 
 
 
-def save_match_html(season):
+def save_match_htmls(seasons):
 	try:
-		url = "https://www.basketball-reference.com/leagues/NBA_" + season+ "_games.html"
-		exception = True
-		print(url)
-		while(exception):
-			try:
-				response = requests.request("GET", url)
-				soup = BeautifulSoup(response.content, 'html.parser')
-				exception = False
-			except requests.exceptions.RequestException as e:
-				print(e)
-				time.sleep(20)
-				exception = True
-		if not os.path.isdir("bs4_html"):
-			os.makedirs("bs4_html")
-		filename = os.path.join(os.getcwd(),"bs4_html/match_list/" \
-			+ "/" +season+".html")
-		os.makedirs(os.path.dirname(filename), exist_ok=True)
-		with open(filename, "w", encoding='utf-8') as f:
-			f.write(str(soup))
+		for i in range(len(seasons)):
+			filename = os.path.join(os.getcwd(),"bs4_html/match_list/" \
+			+ "/" +seasons[i][0]+".html")
+			if os.path.exists(filename):
+				return
+			url = "https://www.basketball-reference.com/leagues/NBA_" + seasons[i][0] \
+				+ "_games.html"
+			exception = True
+			print(url)
+			while(exception):
+				try:
+					response = requests.request("GET", url)
+					soup = BeautifulSoup(response.content, 'html.parser')
+					exception = False
+				except requests.exceptions.RequestException as e:
+					print(e)
+					time.sleep(10)
+					exception = True
+			if not os.path.isdir("bs4_html"):
+				os.makedirs("bs4_html")
+		
+			os.makedirs(os.path.dirname(filename), exist_ok=True)
+			with open(filename, "w", encoding='utf-8') as f:
+				f.write(str(soup))
 	except Exception as err:
 		print(err)
+
+
+
+def scrape_all_boxscores():
+	
 
 
 def save_boxscore_html(team, date):
@@ -90,8 +100,7 @@ def save_match_data(html_path):
 		match_urls = soup.find_all(\
 			href=re.compile('\/leagues\/NBA_[0-9]{4}_games-[A-Za-z]{1,}.html'))
 		match_urls = [re.findall('\/leagues\/NBA_[0-9]{4}_games-[A-Za-z]{1,}.html',\
-			 str(match_urls[i]))[0] \
-			for i in range(len(match_urls))]
+			 str(match_urls[i]))[0] for i in range(len(match_urls))]
 		season = re.findall('[0-9]{4}', html_path)[0]
 		directory = "csv/" + season
 		if not os.path.isdir(directory):
@@ -135,7 +144,7 @@ def seconder(x):
     td = timedelta(minutes=mins, seconds=secs)
     return td.total_seconds()
 
-def save_player_data(html_path, match_id):
+def save_player_data(html_path):
 	try:
 		with open(html_path, 'r', encoding="utf8") as f:
 			contents = f.read()
@@ -171,7 +180,6 @@ def save_player_data(html_path, match_id):
 
 			df['team_name'] = teams[i]
 			df['starter'] = 1
-			df['match_id'] = match_id
 			df['date'] = re.findall("[0-9]{8}", html_path)[0]
 			starter = True
 			drop_rows = []
