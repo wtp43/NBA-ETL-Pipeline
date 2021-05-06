@@ -17,6 +17,9 @@ def main():
 		
 		db_func.exec_query(conn, db_config.create_match_import_table)
 		db_func.exec_query(conn, db_config.create_player_performance_import_table)
+		db_func.exec_query(conn, db_config.create_player_team_table)
+		db_func.exec_query(conn, db_config.create_player_injury_table)
+
 		db_func.exec_query(conn, db_config.create_match_table)
 		db_func.exec_query(conn, db_config.create_team_table)
 		db_func.exec_query(conn, db_config.create_player_performance_table)
