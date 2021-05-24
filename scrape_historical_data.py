@@ -25,8 +25,17 @@ team_abbr = {'Atlanta Hawks':'ATL', 'Boston Celtics' : 'BOS', 'Brooklyn Nets': '
 			'Toronto Raptors':'TOR','Utah Jazz':'UTA','Washington Wizards':'WAS'}
 
 
-
-def save_match_htmls(seasons):
+def scrape_matches(seasons):
+	"""
+    scrape_matches saves the html page on bbref that lists all the games in a season
+	
+	Args:
+		:param seasons: list of seasons to scrape where season is the year 
+			the seasons starts in 
+	
+	:side effect: saves the respective html page as bs4_html/seasons[i].html
+    :return: None
+    """
 	try:
 		for i in range(len(seasons)):
 			filename = os.path.join(os.getcwd(),"bs4_html/match_list/" \
@@ -58,10 +67,27 @@ def save_match_htmls(seasons):
 
 
 def scrape_all_boxscores():
+	"""
+    scrape_all_boxscores saves the 
+
+	:param seasons: 
+	:side effect: 
+    :return: None
+    """
 	
 
 
-def save_boxscore_html(team, date):
+def scrape_boxscore_html(team, date):
+	"""
+    save_boxscore_html saves the html page for a given match (boxscores)
+	
+	Args: 
+		param team: home team of match
+		param date: date of match
+	
+	:side effect: saves the respective html page in bs4_html/boxscores/date+team.html
+    :return: None
+    """
 	try:
 		url = "https://www.basketball-reference.com/boxscores/" + date + team + ".html"
 		exception = True
@@ -91,9 +117,20 @@ def save_all_player_performances(season):
 	for index, row in df.iterrows():
 		print(row['date'], row['home'])
 
-def save_match_data(html_path):
+
+def match_list_to_csv(match_list_html):
+	"""
+    matches_to_csv saves the html page for a given match (boxscores)
+
+	Args: 
+		:param match_list_html: html of match lists 
+			bs4_html/match_list/year.html
+	
+	:side effect: csv with all matches in given season/year
+    :return: None
+    """
 	try:
-		with open(html_path, 'r', encoding="utf8") as f:
+		with open(match_list_html, 'r', encoding="utf8") as f:
 			contents = f.read()
 			soup = BeautifulSoup(contents, 'lxml')
 
@@ -101,7 +138,7 @@ def save_match_data(html_path):
 			href=re.compile('\/leagues\/NBA_[0-9]{4}_games-[A-Za-z]{1,}.html'))
 		match_urls = [re.findall('\/leagues\/NBA_[0-9]{4}_games-[A-Za-z]{1,}.html',\
 			 str(match_urls[i]))[0] for i in range(len(match_urls))]
-		season = re.findall('[0-9]{4}', html_path)[0]
+		season = re.findall('[0-9]{4}', match_list_html)[0]
 		directory = "csv/" + season
 		if not os.path.isdir(directory):
 			os.makedirs(directory)
@@ -144,9 +181,19 @@ def seconder(x):
     td = timedelta(minutes=mins, seconds=secs)
     return td.total_seconds()
 
-def save_player_data(html_path):
+def match_data_to_csv(match_html):
+	'''
+    match_data_to_csv saves the stats of every player in the match into a csv
+
+	Args: 
+		:param match_html: html of the given match 
+			bs4_html/boxscores/date+hometeam.html
+	
+	:side effect: csv with match stats
+    :return: None
+    '''
 	try:
-		with open(html_path, 'r', encoding="utf8") as f:
+		with open(match_html, 'r', encoding="utf8") as f:
 			contents = f.read()
 			soup = BeautifulSoup(contents, 'lxml')
 
@@ -163,7 +210,7 @@ def save_player_data(html_path):
 		directory = "csv/" + season
 		if not os.path.isdir(directory):
 			os.makedirs(directory)
-		file_path = directory+"/"+re.findall("[0-9]{8}[A-Z]{3}", html_path)[0] + ".csv"
+		file_path = directory+"/"+re.findall("[0-9]{8}[A-Z]{3}", match_html)[0] + ".csv"
 		if os.path.exists(file_path):
 			os.remove(file_path)
 
@@ -180,27 +227,27 @@ def save_player_data(html_path):
 
 			df['team_name'] = teams[i]
 			df['starter'] = 1
-			df['date'] = re.findall("[0-9]{8}", html_path)[0]
+			df['inactive'] = 0
+			df['date'] = re.findall("[0-9]{8}", match_html)[0]
 			starter = True
 			drop_rows = []
+			df.replace({'Did Not Play': 0, 'Nan': 0}, regex=True, inplace=True)
+			basic_df.replace({'Did Not Play': 0, 'Nan': 0}, regex=True, inplace=True)
+
 			for j in range(len(df)):
-				
 				if df.iloc[j,0] == 'Reserves':
 					starter = False
 					drop_rows.append(j)
-				if df.iloc[j,0] == 'Team Totals':
-					drop_rows.append(j)
-				if df.iloc[j,1] == 'Did Not Play':
+				elif df.iloc[j,0] == 'Team Totals':
 					drop_rows.append(j)
 				else:
-					df.iloc[j, -1] = [int(starter)]
-
+					df.loc[j,'starter'] = int(starter)
 			df.drop(drop_rows, inplace=True)
 			basic_df.drop(drop_rows, inplace=True)
 			basic_df.drop(['MP', 'Starters'], axis=1, inplace=True)
 
 			df['MP'] = df['MP'].apply(seconder)
-		
+
 			df = pd.concat([df, basic_df], axis = 1)
 			df.rename(columns={'Starters': 'player_name', 'MP': 'sp',
 			'TS%': 'ts_p', 'eFG%': 'efg_p', '3PAr':'three_par', 'FTr': 'ftr',
@@ -211,13 +258,28 @@ def save_player_data(html_path):
 			'FT': 'ft', 'FTA': 'fta', 'FT%': 'ft_p', 'ORB': 'orb',
 			'DRB': 'drb', 'TRB': 'trb', 'AST': 'ast','STL': 'stl',
 			'BLK': 'blk', 'TOV': 'tov', 'PF': 'pf', 'PTS': 'pts', '+/-': 'pm'}, inplace=True)
-			print(df.columns)
+			
 			if i ==0:
 				df.to_csv(file_path, mode='a',index=False, header=True)
 			else:
+				# Add injured/inactive players to last (2nd) iteration of dataframe
+				inactive = re.findall("Inactive:.*div", str(soup))
+				inactive = re.findall(">[A-Za-z ]+<", inactive[0])
+				inactive = [s.rstrip('<').lstrip('>') for s in inactive]
+				match_date = df.loc[0, 'date']
+				for i in range(len(inactive)):
+					if inactive[i] == teams[0] or inactive[i] == teams[1]:
+						team = inactive[i]
+					else:
+						row = [0]*len(df.iloc[0])
+						df.loc[df.index[-1]+1] = row
+						df.loc[df.index[-1],'player_name'] = inactive[i]
+						df.loc[df.index[-1],'team_name'] = team
+						df.loc[df.index[-1],'date'] = match_date
+						df.loc[df.index[-1], 'inactive'] = 1
 				df.to_csv(file_path, mode='a',index=False, header=False)
-
+			
 	except Exception as err:
 		raise err
-		
+
 

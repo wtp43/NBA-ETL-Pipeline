@@ -44,7 +44,7 @@ create_match_table = \
 		FOREIGN KEY (home_id) REFERENCES team
 		);'''
 
-create_player_injury_table = \
+create_injury_table = \
 	'''CREATE TABLE IF NOT EXISTS match(
 		player_id		SERIAL		NOT NULL,
 		match_id		DATE		NOT NULL,
