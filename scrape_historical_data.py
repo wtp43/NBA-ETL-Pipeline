@@ -9,6 +9,7 @@ import pandas as pd
 import time
 import db_func
 
+
 DEBUG = False
 pd.options.display.max_columns = None
 pd.options.display.max_rows = None
@@ -27,7 +28,8 @@ team_abbr = {'Atlanta Hawks':'ATL', 'Boston Celtics' : 'BOS', 'Brooklyn Nets': '
 
 def scrape_matches(seasons):
 	"""
-    scrape_matches saves the html page on bbref that lists all the games in a season
+    scrape_matches saves the html page on bbref that lists all the games in a given 
+	list of seasons
 	
 	Args:
 		:param seasons: list of seasons to scrape where season is the year 
@@ -65,6 +67,33 @@ def scrape_matches(seasons):
 		print(err)
 
 
+def scrape_roster(html):
+	try:
+		with open(html, 'r', encoding="utf8") as f:
+			contents = f.read()
+			soup = BeautifulSoup(contents, 'lxml')
+
+		roster_table = soup.find('table', attrs={'id': 'roster'})
+		players=[]  
+
+		trs = roster_table.findAll('tr')
+		for i in range(1,len(trs)):
+			name = trs[i].a.text
+			url = trs[i].a['href']
+			pos = trs[i].find('td', attrs={'data-stat':'pos'}).text
+			print(name, pos, url)
+			
+		season = re.findall('[0-9]{4}')[0]
+		directory = "csv/" + season
+		if not os.path.isdir(directory):
+			os.makedirs(directory)
+		file = directory+"/"+"match_list.csv"
+
+	except Exception as err:
+		print(err)
+
+
+
 
 def scrape_all_boxscores():
 	"""
@@ -75,6 +104,37 @@ def scrape_all_boxscores():
     :return: None
     """
 	
+def save_html(url, file):
+	"""
+    save_html saves the html page for a given match (boxscores)
+	
+	Args: 
+		param team: home team of match
+		param date: date of match
+	
+	:side effect: saves the respective html page in bs4_html/boxscores/date+team.html
+    :return: None
+    """
+	if os.path.isfile(file):
+		return
+	try:
+		exception = True
+		while(exception):
+			try:
+				response = requests.request("GET", url)
+				soup = BeautifulSoup(response.content, 'html.parser')
+				exception = False
+			except requests.exceptions.RequestException as e:
+				print(e)
+				time.sleep(20)
+				exception = True
+		if not os.path.isdir("bs4_html"):
+			os.makedirs("bs4_html")
+		os.makedirs(os.path.dirname(file), exist_ok=True)
+		with open(file, "w", encoding='utf-8') as f:
+			f.write(str(soup))
+	except Exception as err:
+		print(err)
 
 
 def scrape_boxscore_html(team, date):
@@ -157,7 +217,7 @@ def match_list_to_csv(match_list_html):
 					print(e)
 					time.sleep(20)
 					exception = True
-			table = soup.findAll('table', attrs={'id': 'schedule'})
+			table = soup.find_all('table', attrs={'id': 'schedule'})
 			df = pd.read_html(str(table), flavor='bs4', header=[0])[0]
 			df.drop(columns=df.columns[[1,6,7,8,9]], inplace=True)
 			df.rename(columns={'Date':'date', 'Visitor/Neutral': 'away', 
@@ -198,7 +258,7 @@ def match_data_to_csv(match_html):
 			soup = BeautifulSoup(contents, 'lxml')
 
 		line_score_table = soup.findAll(string=re.compile("div_line_score"))
-		teams = re.findall("teams\/[A-Z]{3}\/[0-9]{4}", str(line_score_table))
+		teams = re.findall(r"teams\/[A-Z]{3}\/[0-9]{4}", str(line_score_table))
 
 		season = teams[0][len(teams[0])-4:]
 		teams = [teams[i][0:len(teams[0])-5].lstrip('teams/') for i in range(len(teams))]

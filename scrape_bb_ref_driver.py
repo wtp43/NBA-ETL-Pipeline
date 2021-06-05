@@ -113,7 +113,59 @@ def insert_seasons(cur):
 		raise err
 
 
+
+def mproc_insert_roster(team,season):
+	'''
+    mproc_insert_roster 
+
+	Args: 
+		:param team: endpoint of player on bbref
+			ex: /players/b/bareajo01.html
+	
+	:side effect: csv with match stats
+    :return: None
+    '''
+	try:
+		conn = None
+		conn = db_func.get_conn()
+		with lock:
+			logging.info("DB connection established")
+
+		url = 'https://www.basketball-reference.com/teams/' + team + \
+			'/' + season + '.html'
+		html = os.path.join(os.getcwd(),"bs4_html/roster/" + season + \
+			"/" +team+".html")
+		shd.save_html(url, html)
+
+	except Exception as err:
+		if conn is not None:
+			conn.rollback()
+		cur = None
+		raise err
+	finally:
+		if conn:
+			conn.close()
+
+	
+
+
+
+
 def mproc_insert_matches(season):
+	'''
+    Wrapper function 
+		1. Save html of match list
+		2. Scrape relevant matches from html 
+		3. Save to CSV
+		4. Copy CSV to match_import tabl
+
+	Args: 
+		:param match_html: html of the given match 
+			bs4_html/boxscores/date+hometeam.html
+	
+	:side effect: csv with match stats
+    :return: None
+    '''
 	try:
 		season = season[0]
 		print(season)
@@ -121,21 +173,27 @@ def mproc_insert_matches(season):
 		conn = db_func.get_conn()
 		with lock:
 			logging.info("DB connection established")
+		
+		url = "https://www.basketball-reference.com/leagues/NBA_" + season \
+				+ "_games.html"
+		html = os.path.join(os.getcwd(),"bs4_html/match_list/" \
+			+ "/" +season+".html")
+		shd.save_html(url, html)
+
 		with lock:
 			logging.info(season+" season html saved")
-		html_path = 'bs4_html/match_list/' + season + '.html' 
-		shd.save_match_data(html_path)
+
+		shd.match_list_to_csv(html)
 		with lock:
 			logging.info(season+" season matches saved to csv")
 
 		cur = conn.cursor()
-		csv_path = 'csv/' + season + '/match_list.csv'
-		insert_matches(csv_path, cur)
+		csv = 'csv/' + season + '/match_list.csv'
+		insert_matches(csv, cur)
 		with lock:
 			logging.info(season +": season matches inserted into match_imports")
 		conn.commit()
-		with lock:
-			logging.info("match table updated with match_imports")	
+
 		
 	except Exception as err:
 		if conn is not None:
@@ -169,7 +227,7 @@ def run_scraper():
 		seasons = [(str(seasons[i][0]),)for i in range(len(seasons))]
 		insert_teams(team_list_path,cur)
 
-		shd.save_match_htmls(seasons)
+		#shd.save_match_htmls(seasons)
 
 		if DEBUG:
 			seasons = [('2021',)]
@@ -185,7 +243,8 @@ def run_scraper():
 			#insert all matches
 			pool.map(mproc_insert_matches, seasons)
 			match_imports_to_match(cur)
-
+			logging.info("match table updated with match_imports")	
+			
 			#query all matches for (date, home, match_id)
 			#download all player performance (date + home.html)
 			#insert all player performances
