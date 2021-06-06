@@ -81,6 +81,25 @@ def match_imports_to_match(cur):
 	except Error as err:
 		raise err
 
+def player_imports_to_player(cur):
+	try:
+		insert_matches_query = \
+		'''INSERT INTO player
+			()
+			SELECT im.date, im.away_pts, im.home_pts,
+				im.away, im.home, im.elevation
+			FROM player_imports as im
+			WHERE NOT EXISTS
+				(SELECT *
+					FROM match AS m, match_imports as im
+					WHERE m.date = im.date
+						AND m.away = im.away
+						AND m.home = im.home);'''
+		cur.execute(insert_matches_query)
+	except Error as err:
+		raise err
+
+
 def get_all_matches(cur):
 	try:
 		select_matches_query = \
@@ -114,9 +133,9 @@ def insert_seasons(cur):
 
 
 
-def mproc_insert_roster(team,season):
+def mproc_save_player_endpoints(team,season):
 	'''
-    mproc_insert_roster 
+    mproc_save_player_endpoints 
 
 	Args: 
 		:param team: endpoint of player on bbref
@@ -126,8 +145,6 @@ def mproc_insert_roster(team,season):
     :return: None
     '''
 	try:
-		conn = None
-		conn = db_func.get_conn()
 		with lock:
 			logging.info("DB connection established")
 
@@ -138,17 +155,7 @@ def mproc_insert_roster(team,season):
 		shd.save_html(url, html)
 
 	except Exception as err:
-		if conn is not None:
-			conn.rollback()
-		cur = None
 		raise err
-	finally:
-		if conn:
-			conn.close()
-
-	
-
-
 
 
 def mproc_insert_matches(season):
@@ -169,10 +176,6 @@ def mproc_insert_matches(season):
 	try:
 		season = season[0]
 		print(season)
-		conn = None
-		conn = db_func.get_conn()
-		with lock:
-			logging.info("DB connection established")
 		
 		url = "https://www.basketball-reference.com/leagues/NBA_" + season \
 				+ "_games.html"
@@ -182,14 +185,13 @@ def mproc_insert_matches(season):
 
 		with lock:
 			logging.info(season+" season html saved")
+		
+		csv = 'csv/' + season + '/player_list.csv'
 
-		shd.match_list_to_csv(html)
+		shd.append_player_endpoints_to_csv(html)
 		with lock:
 			logging.info(season+" season matches saved to csv")
 
-		cur = conn.cursor()
-		csv = 'csv/' + season + '/match_list.csv'
-		insert_matches(csv, cur)
 		with lock:
 			logging.info(season +": season matches inserted into match_imports")
 		conn.commit()
@@ -204,8 +206,52 @@ def mproc_insert_matches(season):
 		if conn:
 			conn.close()
 
-def scrape_htmls():
-	return
+def process_matches(cur, seasons):
+	lock = Lock()
+	pool_size = cpu_count()
+	print(f'starting computations on {pool_size} cores')
+	with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
+		pool.map(mproc_insert_matches, seasons)
+		match_imports_to_match(cur)
+
+def process_players(cur, seasons):
+	lock = Lock()
+	pool_size = cpu_count()
+	print(f'starting computations on {pool_size} cores')
+	with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
+		pool.map(mproc_insert_players, seasons)
+		player_imports_to_player(cur)
+
+def get_teams():
+	conn = db_func.get_conn()
+	cur = conn.cursor()
+	query = \
+		'''SELECT symbol
+			FROM team;'''
+	cur.execute(query)
+	teams = cur.fetchall()
+	teams = [teams[i][0] for i in range(len(teams))]
+	conn.close()
+	return teams
+
+def get_player_endpoints(seasons):
+	try:
+		conn = db_func.get_conn()
+		cur = conn.cursor()
+		
+		teams = get_teams()
+		
+		for s in seasons:
+			for t in teams:
+				mproc_save_player_endpoints(t,s)
+
+	except Exception as err:
+		logging.exception(traceback.print_exception(*sys.exc_info()))
+		sys.exit()
+	finally:
+		if (conn):
+			conn.close()
+			print("PostgreSQL connection is closed")
 
 def run_scraper():
 	if not os.path.isdir("logs"):
@@ -219,42 +265,21 @@ def run_scraper():
 
 	try:
 		conn = db_func.get_conn()
+		cur = conn.cursor()
 
 		team_list_path = 'db_src/NBA_Teams.csv'
-		cur = conn.cursor()
 		insert_seasons(cur)
 		seasons = get_all_seasons(cur)
 		seasons = [(str(seasons[i][0]),)for i in range(len(seasons))]
 		insert_teams(team_list_path,cur)
 
-		#shd.save_match_htmls(seasons)
-
-		if DEBUG:
-			seasons = [('2021',)]
-		
 		db_func.truncate_imports(conn)
-
-		lock = Lock()
 		start = timer()
-
-		pool_size = cpu_count()
-		print(f'starting computations on {pool_size} cores')
-		with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
-			#insert all matches
-			pool.map(mproc_insert_matches, seasons)
-			match_imports_to_match(cur)
-			logging.info("match table updated with match_imports")	
+		
+		process_matches(cur, seasons)
+		logging.info("match table updated with match_imports")	
 			
-			#query all matches for (date, home, match_id)
-			#download all player performance (date + home.html)
-			#insert all player performances
-			#query for features (write func)
-			#aggregate all features into new table used for NN
-
-			#pool.starmap(mproc_job, get_all_matches(conn))
-
-
-		#insert all impor tables
+	
 		
 		conn.commit()
 		end = timer()

@@ -67,7 +67,7 @@ def scrape_matches(seasons):
 		print(err)
 
 
-def scrape_roster(html):
+def append_player_endpoints_to_csv(html):
 	try:
 		with open(html, 'r', encoding="utf8") as f:
 			contents = f.read()
