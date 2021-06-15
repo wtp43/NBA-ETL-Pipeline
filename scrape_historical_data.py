@@ -1,3 +1,4 @@
+from pandas.core.frame import DataFrame
 import requests
 from bs4 import BeautifulSoup
 import re
@@ -8,7 +9,6 @@ import numpy
 import pandas as pd
 import time
 import db_func
-
 
 DEBUG = False
 pd.options.display.max_columns = None
@@ -67,27 +67,25 @@ def scrape_matches(seasons):
 		print(err)
 
 
-def append_player_endpoints_to_csv(html):
+def get_endpoints_df(html):
 	try:
 		with open(html, 'r', encoding="utf8") as f:
 			contents = f.read()
 			soup = BeautifulSoup(contents, 'lxml')
 
 		roster_table = soup.find('table', attrs={'id': 'roster'})
-		players=[]  
+		names = []
+		endpoints=[]  
 
-		trs = roster_table.findAll('tr')
+		trs = roster_table.find_all('tr')
 		for i in range(1,len(trs)):
-			name = trs[i].a.text
-			url = trs[i].a['href']
-			pos = trs[i].find('td', attrs={'data-stat':'pos'}).text
-			print(name, pos, url)
-			
-		season = re.findall('[0-9]{4}')[0]
-		directory = "csv/" + season
-		if not os.path.isdir(directory):
-			os.makedirs(directory)
-		file = directory+"/"+"match_list.csv"
+			names.append(trs[i].a.text)
+			endpoints.append(trs[i].a['href'])
+
+
+		df = DataFrame(list(zip(endpoints, names)))
+		return df
+
 
 	except Exception as err:
 		print(err)
@@ -195,8 +193,8 @@ def match_list_to_csv(match_list_html):
 			soup = BeautifulSoup(contents, 'lxml')
 
 		match_urls = soup.find_all(\
-			href=re.compile('\/leagues\/NBA_[0-9]{4}_games-[A-Za-z]{1,}.html'))
-		match_urls = [re.findall('\/leagues\/NBA_[0-9]{4}_games-[A-Za-z]{1,}.html',\
+			href=re.compile(r'\/leagues\/NBA_[0-9]{4}_games-[A-Za-z]{1,}.html'))
+		match_urls = [re.findall(r'\/leagues\/NBA_[0-9]{4}_games-[A-Za-z]{1,}.html',\
 			 str(match_urls[i]))[0] for i in range(len(match_urls))]
 		season = re.findall('[0-9]{4}', match_list_html)[0]
 		directory = "csv/" + season
@@ -257,7 +255,7 @@ def match_data_to_csv(match_html):
 			contents = f.read()
 			soup = BeautifulSoup(contents, 'lxml')
 
-		line_score_table = soup.findAll(string=re.compile("div_line_score"))
+		line_score_table = soup.findall(string=re.compile("div_line_score"))
 		teams = re.findall(r"teams\/[A-Z]{3}\/[0-9]{4}", str(line_score_table))
 
 		season = teams[0][len(teams[0])-4:]
@@ -274,7 +272,7 @@ def match_data_to_csv(match_html):
 		if os.path.exists(file_path):
 			os.remove(file_path)
 
-		table = soup.findAll('table')
+		table = soup.findall('table')
 		for i in range(len(teams)):
 			basic_stat_tag = 'box-' + teams[i] + '-game-basic'
 			advanced_stat_tag = 'box-' + teams[i] + '-game-advanced'
