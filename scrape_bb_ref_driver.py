@@ -171,14 +171,15 @@ def mproc_save_player_endpoints(team,season):
 def mproc_insert_players(bbref_player_endpoint, player_name):
 	'''
     Wrapper function 
-		1. Save html of match list
-		2. Scrape relevant matches from html 
+		1. Save html of bbref_player_endpoint
+		2. Scrape relevant player info from html 
 		3. Save to CSV
-		4. Copy CSV to match_import tabl
+		4. Copy CSV to player import_table
 
 	Args: 
-		:param match_html: html of the given match 
-			bs4_html/boxscores/date+hometeam.html
+		:param bbref_player_endpoint: html player endpoint on bbref
+			ex: /players/b/brownst02.html
+		:param player_name: previously scraped
 	
 	:side effect: csv with match stats
     :return: None
@@ -186,17 +187,19 @@ def mproc_insert_players(bbref_player_endpoint, player_name):
 	try:
 		conn = db_func.get_conn()
 		cur = conn.cursor()
-		url = "https://www.basketball-reference.com/leagues/NBA_" + bbref_player_endpoint 
-		html = os.path.join(os.getcwd(),"bs4_html/player/" \
-			+ "/" +bbref_player_endpoint)
-		print(bbref_player_endpoint, player_name)
-		#shd.save_html(url, html)
-		#shd.scrape_player(html)
+		url = "https://www.basketball-reference.com/" + bbref_player_endpoint 
+		html = os.path.join(os.getcwd(),"bs4_html" + bbref_player_endpoint)
+		shd.save_html(url, html)
+		shd.player_data_to_csv(html)
+
+		#1)Insert into player table
+
+		#2)Insert into player_team table with pk(player_id)
+
 		with lock:
 			logging.info(bbref_player_endpoint+" season html saved")
 		
-		#scrape relevant info to csv
-		#shd.append_player_endpoints_to_csv(html)
+	
 		with lock:
 			logging.info(bbref_player_endpoint+" season matches saved to csv")
 
@@ -278,10 +281,12 @@ def process_matches(cur, seasons):
 def process_players(cur, seasons):
 	save_player_endpoints(seasons)
 	endpoints = get_player_endpoints()
+	if DEBUG:
+		print(endpoints)
 	lock = Lock()
 	pool_size = cpu_count()
 	with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
-		pool.starmap(mproc_insert_players, endpoints)
+		pool.starmap(mproc_insert_players, ((key,val) for key, val in endpoints.items()))
 		#player_imports_to_player(cur)
 
 def get_teams(season):

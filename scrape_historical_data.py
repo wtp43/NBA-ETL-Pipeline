@@ -25,10 +25,10 @@ team_abbr = {'Atlanta Hawks':'ATL', 'Boston Celtics' : 'BOS', 'Brooklyn Nets': '
 			'Portland Trail Blazers':'POR','Sacramento Kings':'SAC','San Antonio Spurs':'SAS',
 			'Toronto Raptors':'TOR','Utah Jazz':'UTA','Washington Wizards':'WAS'}
 
-def scrape_player(html):
+def player_data_to_csv(html):
 	"""
-    scrape_players scrapes player information from bbref player endpoint page
-	
+	player_data_to_csv saves relevant player infro from bbref_endpoint 
+		html to csv
 	Args:
 		:param html: html of bbref player page
 			ex: /players/b/bibbymi01.html
@@ -36,7 +36,21 @@ def scrape_player(html):
 	:side effect: saves player info from bbref
     :return: None
     """
-	return 
+	try:
+		with open(html, 'r', encoding="utf8") as f:
+			contents = f.read()
+			soup = BeautifulSoup(contents, 'lxml')
+		table = soup.find_all('table', attrs={'id': 'per_game'})
+		df = pd.read_html(str(table), flavor='bs4', header=[0])[0]
+		df.columns = df.columns.str.lower()
+		print(df)
+		cutoff = df.index[df['season'] == 'Career']
+		keep_elements = [i for i in range(cutoff[0])]
+		df.drop(df.index.difference(keep_elements), axis=0, inplace=True)
+		df['season'] = df['season'].apply(lambda x: x[0:2] + x[-2:])
+		return df
+	except Exception as err:
+		raise err
 
 def get_endpoints_df(html):
 	try:
@@ -70,7 +84,7 @@ def save_html(url, file):
 		param team: home team of match
 		param date: date of match
 	
-	:side effect: saves the respective html page in bs4_html/boxscores/date+team.html
+	:side effect: saves the respective html page in file
     :return: None
     """
 	if os.path.isfile(file):
