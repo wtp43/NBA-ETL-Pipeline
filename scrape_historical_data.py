@@ -25,47 +25,18 @@ team_abbr = {'Atlanta Hawks':'ATL', 'Boston Celtics' : 'BOS', 'Brooklyn Nets': '
 			'Portland Trail Blazers':'POR','Sacramento Kings':'SAC','San Antonio Spurs':'SAS',
 			'Toronto Raptors':'TOR','Utah Jazz':'UTA','Washington Wizards':'WAS'}
 
-
-def scrape_matches(seasons):
+def scrape_player(html):
 	"""
-    scrape_matches saves the html page on bbref that lists all the games in a given 
-	list of seasons
+    scrape_players scrapes player information from bbref player endpoint page
 	
 	Args:
-		:param seasons: list of seasons to scrape where season is the year 
-			the seasons starts in 
-	
-	:side effect: saves the respective html page as bs4_html/seasons[i].html
+		:param html: html of bbref player page
+			ex: /players/b/bibbymi01.html
+
+	:side effect: saves player info from bbref
     :return: None
     """
-	try:
-		for i in range(len(seasons)):
-			filename = os.path.join(os.getcwd(),"bs4_html/match_list/" \
-			+ "/" +seasons[i][0]+".html")
-			if os.path.exists(filename):
-				return
-			url = "https://www.basketball-reference.com/leagues/NBA_" + seasons[i][0] \
-				+ "_games.html"
-			exception = True
-			print(url)
-			while(exception):
-				try:
-					response = requests.request("GET", url)
-					soup = BeautifulSoup(response.content, 'html.parser')
-					exception = False
-				except requests.exceptions.RequestException as e:
-					print(e)
-					time.sleep(10)
-					exception = True
-			if not os.path.isdir("bs4_html"):
-				os.makedirs("bs4_html")
-		
-			os.makedirs(os.path.dirname(filename), exist_ok=True)
-			with open(filename, "w", encoding='utf-8') as f:
-				f.write(str(soup))
-	except Exception as err:
-		print(err)
-
+	return 
 
 def get_endpoints_df(html):
 	try:
@@ -90,17 +61,6 @@ def get_endpoints_df(html):
 	except Exception as err:
 		print(err)
 
-
-
-
-def scrape_all_boxscores():
-	"""
-    scrape_all_boxscores saves the 
-
-	:param seasons: 
-	:side effect: 
-    :return: None
-    """
 	
 def save_html(url, file):
 	"""
@@ -136,38 +96,10 @@ def save_html(url, file):
 
 
 def scrape_boxscore_html(team, date):
-	"""
-    save_boxscore_html saves the html page for a given match (boxscores)
-	
-	Args: 
-		param team: home team of match
-		param date: date of match
-	
-	:side effect: saves the respective html page in bs4_html/boxscores/date+team.html
-    :return: None
-    """
-	try:
-		url = "https://www.basketball-reference.com/boxscores/" + date + team + ".html"
-		exception = True
-	
-		while(exception):
-			try:
-				response = requests.request("GET", url)
-				soup = BeautifulSoup(response.content, 'html.parser')
-				exception = False
-			except requests.exceptions.RequestException as e:
-				print(e)
-				time.sleep(20)
-				exception = True
-		if not os.path.isdir("bs4_html"):
-			os.makedirs("bs4_html")
-		filename = os.path.join(os.getcwd(),"bs4_html/boxscores/" \
+	url = "https://www.basketball-reference.com/boxscores/" + date + team + ".html"
+	filename = os.path.join(os.getcwd(),"bs4_html/boxscores/" \
 			+ "/" +date+team+".html")
-		os.makedirs(os.path.dirname(filename), exist_ok=True)
-		with open(filename, "w", encoding='utf-8') as f:
-			f.write(str(soup))
-	except Exception as err:
-		print(err)
+	
 
 def save_all_player_performances(season):
 	file_path = 'csv/' + season + '/match_list.csv'

@@ -15,10 +15,10 @@ from datetime import date, datetime
 import itertools
 import csv
 from pandas.core.frame import DataFrame
+from collections import OrderedDict
 
 
-
-DEBUG = False
+DEBUG = True
 
 def init_child(lock_):
 	global lock
@@ -51,7 +51,7 @@ def insert_matches(csv_file, cur):
 		raise err
 
 def insert_teams(csv_file, cur):
-	headers = ['symbol', 'name']
+	headers = ['symbol', 'name', 'home_arena_elevation', 'created', 'inactive']
 	with open(csv_file, 'r') as f: 
 		next(f)
 		cur.copy_from(f, 'team', columns=headers,sep=',')
@@ -135,8 +135,6 @@ def insert_seasons(cur):
 		cur.close()
 		raise err
 
-
-
 def mproc_save_player_endpoints(team,season):
 	'''
     mproc_save_player_endpoints 
@@ -166,9 +164,11 @@ def mproc_save_player_endpoints(team,season):
 			df.to_csv(csv, mode='a+',index=False, header=False)
 
 	except Exception as err:
+		logging.info("mproc_save_player_endpoints: {}, {}".format(team, season))
+
 		raise err
 
-def mproc_insert_players(player):
+def mproc_insert_players(bbref_player_endpoint, player_name):
 	'''
     Wrapper function 
 		1. Save html of match list
@@ -186,22 +186,22 @@ def mproc_insert_players(player):
 	try:
 		conn = db_func.get_conn()
 		cur = conn.cursor()
-		url = "https://www.basketball-reference.com/leagues/NBA_" + player \
-				+ ".html"
+		url = "https://www.basketball-reference.com/leagues/NBA_" + bbref_player_endpoint 
 		html = os.path.join(os.getcwd(),"bs4_html/player/" \
-			+ "/" +player+".html")
-		shd.save_html(url, html)
-
+			+ "/" +bbref_player_endpoint)
+		print(bbref_player_endpoint, player_name)
+		#shd.save_html(url, html)
+		#shd.scrape_player(html)
 		with lock:
-			logging.info(player+" season html saved")
+			logging.info(bbref_player_endpoint+" season html saved")
 		
 		#scrape relevant info to csv
 		#shd.append_player_endpoints_to_csv(html)
 		with lock:
-			logging.info(player+" season matches saved to csv")
+			logging.info(bbref_player_endpoint+" season matches saved to csv")
 
 		with lock:
-			logging.info(player +": season matches inserted into match_imports")
+			logging.info(bbref_player_endpoint +": season matches inserted into match_imports")
 		conn.commit()
 
 		
@@ -276,22 +276,24 @@ def process_matches(cur, seasons):
 	match_imports_to_match(cur)
 
 def process_players(cur, seasons):
-
 	save_player_endpoints(seasons)
-
+	endpoints = get_player_endpoints()
 	lock = Lock()
 	pool_size = cpu_count()
-	#with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
-		# pool.map(mproc_insert_players, seasons)
-		# player_imports_to_player(cur)
+	with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
+		pool.starmap(mproc_insert_players, endpoints)
+		#player_imports_to_player(cur)
 
-def get_teams():
+def get_teams(season):
+	#Do not use % operator to format query directly (prone to SQL injections)
 	conn = db_func.get_conn()
 	cur = conn.cursor()
 	query = \
 		'''SELECT symbol
-			FROM team;'''
-	cur.execute(query)
+			FROM team
+			WHERE %s >= created
+			AND %s < inactive ;'''
+	cur.execute(query, (season, season))
 	teams = cur.fetchall()
 	teams = [teams[i][0] for i in range(len(teams))]
 	conn.close()
@@ -301,7 +303,8 @@ def get_teams():
 def get_player_endpoints():
 	with open('csv/player_list.csv', newline='') as f:
 		reader = csv.reader(f)
-		endpoints = set((list(reader)))
+		#print(list(reader))
+		endpoints = {i[0] : i[1] for i in sorted(list(reader), key=lambda x: x[0])}
 	return endpoints
 
 def save_player_endpoints(seasons):
@@ -322,34 +325,23 @@ def save_player_endpoints(seasons):
 		
 		with open('csv/player_list.csv', newline='', mode='w+') as f:
 			f.truncate()
-		teams = get_teams()
+
 		pool_size = cpu_count()
 		if DEBUG:
 			pool_size = 1
 		lock = Lock()
-		print(seasons)
-		with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
-			pool.starmap(mproc_save_player_endpoints, list(itertools.product(teams, seasons)))
+		
+		for s in seasons:
+			print([s])
+			teams = get_teams(s)
+			print(teams)
+			with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
+				pool.starmap(mproc_save_player_endpoints, list(itertools.product(teams, [s])))
 		
 
 	except Exception as err:
 		logging.exception(traceback.print_exception(*sys.exc_info()))
 		sys.exit()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -1,31 +1,33 @@
-symbol,name
-ATL,Atlanta Hawks
-BOS,Boston Celtics
-NJN,Brooklyn Nets
-CHA,Charlotte Hornets
-CHI,Chicago Bulls
-CLE,Cleveland Cavaliers
-DAL,Dallas Mavericks
-DEN,Denver Nuggets
-DET,Detroit Pistons
-GSW,Golden State Warriors
-HOU,Houston Rockets
-IND,Indiana Pacers
-LAC,Los Angeles Clippers
-LAL,Los Angeles Lakers
-MEM,Memphis Grizzlies
-MIA,Miami Heat
-MIL,Milwaukee Bucks
-MIN,Minnesota Timberwolves
-NOH,New Orleans Pelicans
-NYK,New York Knicks
-OKC,Oklahoma City Thunder
-ORL,Orlando Magic
-PHI,Philadelphia 76ers
-PHO,Phoenix Suns
-POR,Portland Trail Blazers
-SAC,Sacramento Kings
-SAS,San Antonio Spurs
-TOR,Toronto Raptors
-UTA,Utah Jazz
-WAS,Washington Wizards
+symbol,name,home_arena_elevation,created,inactive
+ATL,Atlanta Hawks,0,0,3000
+BOS,Boston Celtics,0,0,3000
+BRK,Brooklyn Nets,0,2013,3000
+CHO,Charlotte Hornets,0,2015,3000
+CHI,Chicago Bulls,0,0,3000
+CLE,Cleveland Cavaliers,0,0,3000
+DAL,Dallas Mavericks,0,0,3000
+DEN,Denver Nuggets,0,0,3000
+DET,Detroit Pistons,0,0,3000
+GSW,Golden State Warriors,0,0,3000
+HOU,Houston Rockets,0,0,3000
+IND,Indiana Pacers,0,0,3000
+LAC,Los Angeles Clippers,0,0,3000
+LAL,Los Angeles Lakers,0,0,3000
+MEM,Memphis Grizzlies,0,0,3000
+MIA,Miami Heat,0,0,3000
+MIL,Milwaukee Bucks,0,0,3000
+MIN,Minnesota Timberwolves,0,0,3000
+NOH,New Orleans Pelicans,0,0,3000
+NYK,New York Knicks,0,0,3000
+OKC,Oklahoma City Thunder,0,0,3000
+ORL,Orlando Magic,0,0,3000
+PHI,Philadelphia 76ers,0,0,3000
+PHO,Phoenix Suns,0,0,3000
+POR,Portland Trail Blazers,0,0,3000
+SAC,Sacramento Kings,0,0,3000
+SAS,San Antonio Spurs,0,0,3000
+TOR,Toronto Raptors,0,0,3000
+UTA,Utah Jazz,0,0,3000
+WAS,Washington Wizards,0,0,3000
+CHA,Charlotte Bobcats,0,0,2015
+NJN,New Jersey Nets,0,0,2013

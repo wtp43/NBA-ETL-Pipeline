@@ -10,6 +10,8 @@ create_team_table = \
 		team_name				TEXT		NOT NULL,
 		symbol					CHAR(3)		NOT NULL,
 		home_arena_elevation	REAL		DEFAULT 0,
+		created					SMALLINT	DEFAULT 0
+		inactive				SMALLINT 	DEFAULT 3000,
 		PRIMARY KEY(team_id)
 		);'''
 
