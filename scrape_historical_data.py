@@ -25,7 +25,7 @@ team_abbr = {'Atlanta Hawks':'ATL', 'Boston Celtics' : 'BOS', 'Brooklyn Nets': '
 			'Portland Trail Blazers':'POR','Sacramento Kings':'SAC','San Antonio Spurs':'SAS',
 			'Toronto Raptors':'TOR','Utah Jazz':'UTA','Washington Wizards':'WAS'}
 
-def player_data_to_csv(html):
+def player_data_to_csv(html, endpoint):
 	"""
 	player_data_to_csv saves relevant player infro from bbref_endpoint 
 		html to csv
@@ -48,7 +48,14 @@ def player_data_to_csv(html):
 		keep_elements = [i for i in range(cutoff[0])]
 		df.drop(df.index.difference(keep_elements), axis=0, inplace=True)
 		df['season'] = df['season'].apply(lambda x: x[0:2] + x[-2:])
-		return df
+
+		directory = 'csv' + re.findall('/players/[a-z]{1}',endpoint)[0]
+
+		if not os.path.isdir(directory):
+			os.makedirs(directory)
+		
+		file_path = 'csv' + endpoint[:-5] + '.csv'
+		df.to_csv(file_path, mode='w+',index=False, header=True)
 	except Exception as err:
 		raise err
 

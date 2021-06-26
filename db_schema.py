@@ -1,29 +1,30 @@
 create_season_table =\
 	'''CREATE TABLE IF NOT EXISTS season(
 		year	SMALLINT	NOT NULL,
-		PRIMARY KEY (year)
+		PRIMARY KEY(year)
 		);'''
 		
 create_team_table = \
 	'''CREATE TABLE IF NOT EXISTS team(
 		team_id					SERIAL		NOT NULL,
 		team_name				TEXT		NOT NULL,
-		symbol					CHAR(3)		NOT NULL,
+		symbol					TEXT		NOT NULL,
 		home_arena_elevation	REAL		DEFAULT 0,
-		created					SMALLINT	DEFAULT 0
+		created					SMALLINT	DEFAULT 0,
 		inactive				SMALLINT 	DEFAULT 3000,
 		PRIMARY KEY(team_id)
 		);'''
 
 create_player_table = \
-	'''CREATE TABLE IF NOT EXISTS team(
-		player_id					SERIAL		NOT NULL,
-		player_name					TEXT		NOT NULL,
+	'''CREATE TABLE IF NOT EXISTS player(
+		player_id				SERIAL		NOT NULL,
+		player_name				TEXT		NOT NULL,
+		endpoint				TEXT		NOT NULL,
 		PRIMARY KEY(player_id)
 		);'''
 
 create_player_team_table = \
-	'''CREATE TABLE IF NOT EXISTS team(
+	'''CREATE TABLE IF NOT EXISTS player_team(
 		player_id					SERIAL		NOT NULL,
 		team_id						SERIAL		NOT NULL,
 		year						SMALLINT	NOT NULL,
@@ -47,13 +48,13 @@ create_match_table = \
 		);'''
 
 create_injury_table = \
-	'''CREATE TABLE IF NOT EXISTS match(
+	'''CREATE TABLE IF NOT EXISTS injury(
 		player_id		SERIAL		NOT NULL,
-		match_id		DATE		NOT NULL,
+		match_id		SERIAL		NOT NULL,
 		injury			TEXT				,
 		PRIMARY KEY (player_id, match_id),
 		FOREIGN KEY (player_id) REFERENCES player,
-		FOREIGN KEY (match_id) REFERENCES match,
+		FOREIGN KEY (match_id) REFERENCES match
 		);'''
 
 
@@ -99,16 +100,18 @@ create_player_performance_import_table = \
 		pm				INTEGER		DEFAULT 0
 		);'''
 
-create_match_import_table = \
-	'''CREATE UNLOGGED TABLE IF NOT EXISTS match_imports(
-		date			DATE		NOT NULL,
-		away_pts		REAL		NOT NULL,
-		home_pts		REAL		NOT NULL,
-		away 			CHAR(3)		NOT NULL,
-		home 			CHAR(3)		NOT NULL,
-		elevation		REAL		DEFAULT 0
-		);'''
 
+create_imports_table = \
+	'''CREATE UNLOGGED TABLE IF NOT EXISTS imports(
+		date			DATE,
+		away_pts		REAL,
+		home_pts		REAL,
+		away 			TEXT,
+		home 			TEXT,
+		elevation		REAL,
+		player_name		TEXT,
+		bbref_endpoint	TEXT
+		);'''
 
 create_player_performance_table = \
 	'''CREATE TABLE IF NOT EXISTS player_performance(

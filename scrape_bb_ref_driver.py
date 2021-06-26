@@ -27,7 +27,7 @@ def init_child(lock_):
 	lock = lock_
 
 
-
+#Change to insert_to_imports 
 def insert_player_performance(csv_file, ticker, cur):
 	try:
 		headers = ['player_name', 'sp', 'ts_p', 'efg_p', 'three_par', 'ftr', 'orb_p',
@@ -41,20 +41,17 @@ def insert_player_performance(csv_file, ticker, cur):
 	except Exception as err:
 		raise err
 
-def insert_matches(csv_file, cur):
-	try:
-		headers = ['date', 'away', 'away_pts', 'home', 'home_pts']
-		with open(csv_file, 'r') as f: 
-			next(f)
-			cur.copy_from(f, 'match_imports', columns=headers,sep=',')
-	except Exception as err:
-		raise err
 
-def insert_teams(csv_file, cur):
+def insert_teams(csv, cur):
 	headers = ['symbol', 'name', 'home_arena_elevation', 'created', 'inactive']
-	with open(csv_file, 'r') as f: 
+	with open(csv, 'r') as f: 
 		next(f)
 		cur.copy_from(f, 'team', columns=headers,sep=',')
+
+def insert_to_imports(csv, cur):
+	with open(csv, 'r') as f: 
+		headers = next(f)
+		cur.copy_from(f, 'imports', columns=headers,sep=',')
 
 def get_match_list_csvs(seasons):
 	try:
@@ -134,6 +131,9 @@ def insert_seasons(cur):
 		conn.rollback()
 		cur.close()
 		raise err
+		
+#def insert_players(cur):
+
 
 def mproc_save_player_endpoints(team,season):
 	'''
@@ -190,7 +190,7 @@ def mproc_insert_players(bbref_player_endpoint, player_name):
 		url = "https://www.basketball-reference.com/" + bbref_player_endpoint 
 		html = os.path.join(os.getcwd(),"bs4_html" + bbref_player_endpoint)
 		shd.save_html(url, html)
-		shd.player_data_to_csv(html)
+		shd.player_data_to_csv(html, bbref_player_endpoint)
 
 		#1)Insert into player table
 
@@ -254,7 +254,8 @@ def mproc_insert_matches(season):
 		
 		csv = os.path.join(os.getcwd(),"csv/" + season + "/" \
 			+ "/match_list.html")
-		insert_matches(csv, cur)
+		headers = ['date', 'away', 'away_pts', 'home', 'home_pts']
+		insert_to_imports(cur, csv, headers)
 
 		with lock:
 			logging.info(season +": season matches inserted into match_imports")
@@ -281,6 +282,10 @@ def process_matches(cur, seasons):
 def process_players(cur, seasons):
 	save_player_endpoints(seasons)
 	endpoints = get_player_endpoints()
+
+	#insert endpoints + player names into import table
+
+
 	if DEBUG:
 		print(endpoints)
 	lock = Lock()
