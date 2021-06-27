@@ -43,11 +43,21 @@ def player_data_to_csv(html, endpoint):
 		table = soup.find_all('table', attrs={'id': 'per_game'})
 		df = pd.read_html(str(table), flavor='bs4', header=[0])[0]
 		df.columns = df.columns.str.lower()
-		print(df)
+		df.columns = [s.replace('%', '_pct') for s in df.columns]
+		df.columns = [s.replace('3', 'three') for s in df.columns]
+		df.columns = [s.replace('2', 'two') for s in df.columns]
+		df.columns
+
+		if DEBUG:
+			print(df)
+			print(df.columns)
+
 		cutoff = df.index[df['season'] == 'Career']
 		keep_elements = [i for i in range(cutoff[0])]
 		df.drop(df.index.difference(keep_elements), axis=0, inplace=True)
 		df['season'] = df['season'].apply(lambda x: x[0:2] + x[-2:])
+		df['pos'] = df['pos'].apply(lambda x: x.replace(',', ':'))
+
 
 		directory = 'csv' + re.findall('/players/[a-z]{1}',endpoint)[0]
 
@@ -77,8 +87,6 @@ def get_endpoints_df(html):
 
 		df = DataFrame(list(zip(endpoints, names)))
 		return df
-
-
 	except Exception as err:
 		print(err)
 
@@ -261,15 +269,14 @@ def match_data_to_csv(match_html):
 
 			df = pd.concat([df, basic_df], axis = 1)
 			df.rename(columns={'Starters': 'player_name', 'MP': 'sp',
-			'TS%': 'ts_p', 'eFG%': 'efg_p', '3PAr':'three_par', 'FTr': 'ftr',
-			'ORB%': 'orb_p', 'DRB%':'drb_p', 'TRB%': 'trb_p', 'AST%':'ast_p',
-			'STL%': 'stl_p', 'BLK%':'blk_p', 'TOV%': 'tov_p', 'USG%': 'usg_p',
-			'ORtg': 'ortg', 'DRtg':'drtg', 'BPM':'bpm', 'FG': 'fg',
-			'FGA': 'fga', 'FG%': 'fg_p', '3P': 'three_p', '3PA': 'three_pa', '3P%': 'three_p_p',
-			'FT': 'ft', 'FTA': 'fta', 'FT%': 'ft_p', 'ORB': 'orb',
-			'DRB': 'drb', 'TRB': 'trb', 'AST': 'ast','STL': 'stl',
-			'BLK': 'blk', 'TOV': 'tov', 'PF': 'pf', 'PTS': 'pts', '+/-': 'pm'}, inplace=True)
+				'+/-': 'pm'}, inplace=True)
 			
+			df.columns = df.columns.str.lower()
+			df.columns = [s.replace('%', '_pct') for s in df.columns]
+			df.columns = [s.replace('3', 'three') for s in df.columns]
+			df.columns = [s.replace('2', 'two') for s in df.columns]
+
+
 			if i ==0:
 				df.to_csv(file_path, mode='a',index=False, header=True)
 			else:

@@ -1,6 +1,8 @@
 import db_func
 import db_config
 import scrape_historical_data as shd
+import sql_insert_funcs as sif
+
 import psycopg2
 from psycopg2 import pool
 from psycopg2 import OperationalError, errorcodes, errors, Error
@@ -15,7 +17,6 @@ from datetime import date, datetime
 import itertools
 import csv
 from pandas.core.frame import DataFrame
-from collections import OrderedDict
 
 
 DEBUG = True
@@ -27,31 +28,6 @@ def init_child(lock_):
 	lock = lock_
 
 
-#Change to insert_to_imports 
-def insert_player_performance(csv_file, ticker, cur):
-	try:
-		headers = ['player_name', 'sp', 'ts_p', 'efg_p', 'three_par', 'ftr', 'orb_p',
-       'drb_p', 'trb_p', 'ast_p', 'stl_p', 'blk_p', 'tov_p', 'usg_p', 'ortg',
-       'drtg', 'bpm', 'team_name', 'starter', 'match_id', 'date', 'fg', 'fga',
-       'fg_p', 'three_p', 'three_pa', 'three_p_p', 'ft', 'fta', 'ft_p', 'orb',
-       'drb', 'trb', 'ast', 'stl', 'blk', 'tov', 'pf', 'pts', 'pm']
-		with open(csv_file, 'r') as f: 
-			next(f)
-			cur.copy_from(f, 'player_performance_imports', columns=headers,sep=',')
-	except Exception as err:
-		raise err
-
-
-def insert_teams(csv, cur):
-	headers = ['symbol', 'name', 'home_arena_elevation', 'created', 'inactive']
-	with open(csv, 'r') as f: 
-		next(f)
-		cur.copy_from(f, 'team', columns=headers,sep=',')
-
-def insert_to_imports(csv, cur):
-	with open(csv, 'r') as f: 
-		headers = next(f)
-		cur.copy_from(f, 'imports', columns=headers,sep=',')
 
 def get_match_list_csvs(seasons):
 	try:
@@ -64,41 +40,6 @@ def get_match_list_csvs(seasons):
 		raise err
 	return all_files
 
-def match_imports_to_match(cur):
-	try:
-		insert_matches_query = \
-		'''INSERT INTO match
-			(date, away_pts, home_pts, away, home, elevation)
-			SELECT im.date, im.away_pts, im.home_pts,
-				im.away, im.home, im.elevation
-			FROM match_imports as im
-			WHERE NOT EXISTS
-				(SELECT *
-					FROM match AS m, match_imports as im
-					WHERE m.date = im.date
-						AND m.away = im.away
-						AND m.home = im.home);'''
-		cur.execute(insert_matches_query)
-	except Error as err:
-		raise err
-
-def player_imports_to_player(cur):
-	try:
-		insert_matches_query = \
-		'''INSERT INTO player
-			()
-			SELECT im.date, im.away_pts, im.home_pts,
-				im.away, im.home, im.elevation
-			FROM player_imports as im
-			WHERE NOT EXISTS
-				(SELECT *
-					FROM match AS m, match_imports as im
-					WHERE m.date = im.date
-						AND m.away = im.away
-						AND m.home = im.home);'''
-		cur.execute(insert_matches_query)
-	except Error as err:
-		raise err
 
 
 def get_all_matches(cur):
@@ -121,17 +62,7 @@ def get_all_seasons(cur):
 	except Error as err:
 		raise err
 
-def insert_seasons(cur):
-	try:
-		seasons = [[i] for i in(range(2005,2022))]
-		cur.executemany('''INSERT INTO season (year)
-							VALUES (%s)
-							ON CONFLICT (year) DO NOTHING;''', seasons)
-	except Error as err:
-		conn.rollback()
-		cur.close()
-		raise err
-		
+
 #def insert_players(cur):
 
 
@@ -255,7 +186,7 @@ def mproc_insert_matches(season):
 		csv = os.path.join(os.getcwd(),"csv/" + season + "/" \
 			+ "/match_list.html")
 		headers = ['date', 'away', 'away_pts', 'home', 'home_pts']
-		insert_to_imports(cur, csv, headers)
+		insert_to_imports(cur, csv)
 
 		with lock:
 			logging.info(season +": season matches inserted into match_imports")
@@ -277,7 +208,7 @@ def process_matches(cur, seasons):
 	print(f'starting computations on {pool_size} cores')
 	with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
 		pool.map(mproc_insert_matches, seasons)
-	match_imports_to_match(cur)
+	sif.match_imports_to_match(cur)
 
 def process_players(cur, seasons):
 	save_player_endpoints(seasons)
