@@ -1,4 +1,4 @@
-symbol,name,home_arena_elevation,created,inactive
+team_id,team_name,home_arena_elevation,created,inactive
 ATL,Atlanta Hawks,0,0,3000
 BOS,Boston Celtics,0,0,3000
 BRK,Brooklyn Nets,0,2013,3000
@@ -31,4 +31,5 @@ UTA,Utah Jazz,0,0,3000
 WAS,Washington Wizards,0,0,3000
 CHA,Charlotte Bobcats,0,0,2015
 NJN,New Jersey Nets,0,0,2013
-NOH,New Orleans Hornets,0,0,2013
+NOH,New Orleans Hornets,0,2008,2013
+NOK,New Orleans/Oklahoma City Hornets,0,0,2008

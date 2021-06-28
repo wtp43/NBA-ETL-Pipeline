@@ -25,7 +25,7 @@ team_abbr = {'Atlanta Hawks':'ATL', 'Boston Celtics' : 'BOS', 'Brooklyn Nets': '
 			'Portland Trail Blazers':'POR','Sacramento Kings':'SAC','San Antonio Spurs':'SAS',
 			'Toronto Raptors':'TOR','Utah Jazz':'UTA','Washington Wizards':'WAS'}
 
-def player_data_to_csv(html, endpoint):
+def player_data_to_csv(html, bbref_endpoint, player_name):
 	"""
 	player_data_to_csv saves relevant player infro from bbref_endpoint 
 		html to csv
@@ -46,6 +46,7 @@ def player_data_to_csv(html, endpoint):
 		df.columns = [s.replace('%', '_pct') for s in df.columns]
 		df.columns = [s.replace('3', 'three') for s in df.columns]
 		df.columns = [s.replace('2', 'two') for s in df.columns]
+
 		df.columns
 
 		if DEBUG:
@@ -57,14 +58,16 @@ def player_data_to_csv(html, endpoint):
 		df.drop(df.index.difference(keep_elements), axis=0, inplace=True)
 		df['season'] = df['season'].apply(lambda x: x[0:2] + x[-2:])
 		df['pos'] = df['pos'].apply(lambda x: x.replace(',', ':'))
+		df['bbref_endpoint'] = bbref_endpoint
+		df['player_name'] = player_name
+		df.rename(columns={'team': 'team_id'}, inplace=True)
 
-
-		directory = 'csv' + re.findall('/players/[a-z]{1}',endpoint)[0]
+		directory = 'csv' + re.findall('/players/[a-z]{1}',bbref_endpoint)[0]
 
 		if not os.path.isdir(directory):
 			os.makedirs(directory)
 		
-		file_path = 'csv' + endpoint[:-5] + '.csv'
+		file_path = 'csv' + bbref_endpoint[:-5] + '.csv'
 		df.to_csv(file_path, mode='w+',index=False, header=True)
 	except Exception as err:
 		raise err

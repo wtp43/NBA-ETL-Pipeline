@@ -1,3 +1,49 @@
+# Section 1: Match info
+# Section 2: Player info
+create_imports_table = \
+	'''CREATE UNLOGGED TABLE IF NOT EXISTS imports(
+		date			DATE,
+		away_pts		REAL,
+		home_pts		REAL,
+		away 			TEXT,
+		home 			TEXT,
+		elevation		REAL,
+
+		player_name		TEXT,
+		bbref_endpoint 	TEXT,
+		season			REAL,
+		age				REAL,
+		team_id			TEXT,
+		lg				TEXT,
+		pos				TEXT,
+		g				REAL,
+		gs				REAL,
+		mp				REAL,
+		fg				REAL,
+		fga				REAL,
+		fg_pct			REAL,
+		threep			REAL,
+		threepa			REAL,
+		threep_pct		REAL,
+		twop			REAL,
+		twopa			REAL,
+		twop_pct		REAL,
+		efg_pct			REAL,
+		ft				REAL,
+		fta				REAL,
+		ft_pct			REAL,
+		orb				REAL,
+		drb				REAL,
+		trb				REAL,
+		ast				REAL,
+		stl				REAL,
+		blk				REAL,
+		tov				REAL,
+		pf				REAL,
+		pts				REAL
+
+		);'''
+
 create_season_table =\
 	'''CREATE TABLE IF NOT EXISTS season(
 		year	SMALLINT	NOT NULL,
@@ -6,9 +52,8 @@ create_season_table =\
 		
 create_team_table = \
 	'''CREATE TABLE IF NOT EXISTS team(
-		team_id					SERIAL		NOT NULL,
 		team_name				TEXT		NOT NULL,
-		symbol					TEXT		NOT NULL,
+		team_id					TEXT		NOT NULL,
 		home_arena_elevation	REAL		DEFAULT 0,
 		created					SMALLINT	DEFAULT 0,
 		inactive				SMALLINT 	DEFAULT 3000,
@@ -19,16 +64,44 @@ create_player_table = \
 	'''CREATE TABLE IF NOT EXISTS player(
 		player_id				SERIAL		NOT NULL,
 		player_name				TEXT		NOT NULL,
-		endpoint				TEXT		NOT NULL,
+		bbref_endpoint			TEXT		NOT NULL,
 		PRIMARY KEY(player_id)
 		);'''
 
 create_player_team_table = \
 	'''CREATE TABLE IF NOT EXISTS player_team(
-		player_id					SERIAL		NOT NULL,
-		team_id						SERIAL		NOT NULL,
-		year						SMALLINT	NOT NULL,
-		PRIMARY KEY(player_id, team_id, year),
+		player_id		SERIAL		NOT NULL,
+		team_id			TEXT		NOT NULL,
+		season			SMALLINT	NOT NULL,
+		age				REAL,
+		lg				TEXT,
+		pos				TEXT,
+		g				REAL,
+		gs				REAL,
+		mp				REAL,
+		fg				REAL,
+		fga				REAL,
+		fg_pct			REAL,
+		threep			REAL,
+		threepa			REAL,
+		threep_pct		REAL,
+		twop			REAL,
+		twopa			REAL,
+		twop_pct		REAL,
+		efg_pct			REAL,
+		ft				REAL,
+		fta				REAL,
+		ft_pct			REAL,
+		orb				REAL,
+		drb				REAL,
+		trb				REAL,
+		ast				REAL,
+		stl				REAL,
+		blk				REAL,
+		tov				REAL,
+		pf				REAL,
+		pts				REAL,
+		PRIMARY KEY(player_id, team_id, season),
 		FOREIGN KEY (player_id) REFERENCES player,
 		FOREIGN KEY (team_id) REFERENCES team
 		);'''
@@ -39,8 +112,8 @@ create_match_table = \
 		date			DATE		NOT NULL,
 		away_pts		REAL		NOT NULL,
 		home_pts		REAL		NOT NULL,
-		away_id 		SERIAL		NOT NULL,
-		home_id			SERIAL		NOT NULL,
+		away_id 		TEXT		NOT NULL,
+		home_id			TEXT		NOT NULL,
 		elevation		REAL		DEFAULT 0,
 		PRIMARY KEY (match_id),
 		FOREIGN KEY (away_id) REFERENCES team,
@@ -100,51 +173,6 @@ create_player_performance_import_table = \
 		pm				REAL		DEFAULT 0
 		);'''
 
-# Section 1: Match info
-# Section 2: Player info
-create_imports_table = \
-	'''CREATE UNLOGGED TABLE IF NOT EXISTS imports(
-		date			DATE,
-		away_pts		REAL,
-		home_pts		REAL,
-		away 			TEXT,
-		home 			TEXT,
-		elevation		REAL,
-
-		player_name		TEXT,
-		bbref_endpoint 	TEXT,
-		season			REAL,
-		age				REAL,
-		team			TEXT,
-		lg				TEXT,
-		pos				TEXT,
-		g				REAL,
-		gs				REAL,
-		mp				REAL,
-		fg				REAL,
-		fga				REAL,
-		fg_pct			REAL,
-		threep			REAL,
-		threepa			REAL,
-		threep_pct		REAL,
-		twop			REAL,
-		twopa			REAL,
-		twop_pct		REAL,
-		efg_pct			REAL,
-		ft				REAL,
-		fta				REAL,
-		ft_pct			REAL,
-		orb				REAL,
-		drb				REAL,
-		trb				REAL,
-		ast				REAL,
-		stl				REAL,
-		blk				REAL,
-		tov				REAL,
-		pf				REAL,
-		pts				REAL
-
-		);'''
 
 create_player_performance_table = \
 	'''CREATE TABLE IF NOT EXISTS player_performance(

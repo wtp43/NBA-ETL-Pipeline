@@ -99,7 +99,7 @@ def mproc_save_player_endpoints(team,season):
 
 		raise err
 
-def mproc_insert_players(bbref_player_endpoint, player_name):
+def mproc_insert_players(bbref_endpoint, player_name):
 	'''
     Wrapper function 
 		1. Save html of bbref_player_endpoint
@@ -118,24 +118,18 @@ def mproc_insert_players(bbref_player_endpoint, player_name):
 	try:
 		conn = db_func.get_conn()
 		cur = conn.cursor()
-		url = "https://www.basketball-reference.com/" + bbref_player_endpoint 
-		html = os.path.join(os.getcwd(),"bs4_html" + bbref_player_endpoint)
+		url = "https://www.basketball-reference.com/" + bbref_endpoint 
+		html = os.path.join(os.getcwd(),"bs4_html" + bbref_endpoint)
 		shd.save_html(url, html)
-		shd.player_data_to_csv(html, bbref_player_endpoint)
+		shd.player_data_to_csv(html, bbref_endpoint, player_name)
 
-		#1)Insert into player table
-
-		#2)Insert into player_team table with pk(player_id)
-
-		with lock:
-			logging.info(bbref_player_endpoint+" season html saved")
-		
-	
-		with lock:
-			logging.info(bbref_player_endpoint+" season matches saved to csv")
+		#Insert player data into imports
+		file_path = 'csv' + bbref_endpoint[:-5] + '.csv'
+		sif.insert_to_imports(file_path, cur)
 
 		with lock:
-			logging.info(bbref_player_endpoint +": season matches inserted into match_imports")
+			logging.info('endpoint: %s, player: %s inserted into imports table'
+			.format(bbref_endpoint, player_name)) 
 		conn.commit()
 
 		
@@ -203,19 +197,21 @@ def mproc_insert_matches(season):
 			conn.close()
 
 def process_matches(cur, seasons):
+	db_func.truncate_imports(conn)
+
 	lock = Lock()
 	pool_size = cpu_count()
 	print(f'starting computations on {pool_size} cores')
 	with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
 		pool.map(mproc_insert_matches, seasons)
-	sif.match_imports_to_match(cur)
+	sif.imports_to_match(cur)
 
 def process_players(cur, seasons):
+	#truncate imports
+	db_func.truncate_imports(conn)
+
 	save_player_endpoints(seasons)
 	endpoints = get_player_endpoints()
-
-	#insert endpoints + player names into import table
-
 
 	if DEBUG:
 		print(endpoints)
@@ -223,7 +219,8 @@ def process_players(cur, seasons):
 	pool_size = cpu_count()
 	with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
 		pool.starmap(mproc_insert_players, ((key,val) for key, val in endpoints.items()))
-		#player_imports_to_player(cur)
+		sif.imports_to_player(cur)
+		sif.imports_to_player_team(cur)
 
 def get_teams(season):
 	#Do not use % operator to format query directly (prone to SQL injections)
