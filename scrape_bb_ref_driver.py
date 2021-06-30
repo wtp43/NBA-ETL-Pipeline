@@ -19,12 +19,10 @@ import csv
 from pandas.core.frame import DataFrame
 
 
-DEBUG = True
+DEBUG = False
 
 def init_child(lock_):
 	global lock
-	global conn
-	conn = db_func.get_conn()
 	lock = lock_
 
 
@@ -73,6 +71,8 @@ def mproc_save_player_endpoints(team,season):
 	Args: 
 		:param team: endpoint of player on bbref
 			ex: /players/b/bareajo01.html
+		:param season: given in a tuple
+			ex: ('2020',)
 	
 	:side effect: csv with match stats
     :return: None
@@ -81,7 +81,7 @@ def mproc_save_player_endpoints(team,season):
 
 		# with lock:
 		# 	logging.info("DB connection established")
-		print(season)
+		season = season[0]
 		url = 'https://www.basketball-reference.com/teams/' + team + \
 			'/' + season + '.html'
 		html = os.path.join(os.getcwd(),"bs4_html/roster/" + season + \
@@ -116,32 +116,36 @@ def mproc_insert_players(bbref_endpoint, player_name):
     :return: None
     '''
 	try:
-		conn = db_func.get_conn()
-		cur = conn.cursor()
-		url = "https://www.basketball-reference.com/" + bbref_endpoint 
+		print(bbref_endpoint, player_name)
+		url = "https://www.basketball-reference.com" + bbref_endpoint 
 		html = os.path.join(os.getcwd(),"bs4_html" + bbref_endpoint)
+		
 		shd.save_html(url, html)
-		shd.player_data_to_csv(html, bbref_endpoint, player_name)
-
+		with lock:
+			logging.info('bbref_endpoint: {}, player_name: {} scraped'
+			.format(bbref_endpoint, player_name)) 
+		
+		err = shd.player_data_to_csv(html, bbref_endpoint, player_name)
+		if err:
+			with lock:
+				logging.info('bbref_endpoint: {}, player_name: {} NO DATA FOUND'
+			.format(bbref_endpoint, player_name))
+			return 
+				
+		with lock:
+			logging.info('bbref_endpoint: {}, player_name: {} saved to csv'
+			.format(bbref_endpoint, player_name)) 
+		
 		#Insert player data into imports
 		file_path = 'csv' + bbref_endpoint[:-5] + '.csv'
-		sif.insert_to_imports(file_path, cur)
-
-		with lock:
-			logging.info('endpoint: %s, player: %s inserted into imports table'
-			.format(bbref_endpoint, player_name)) 
-		conn.commit()
+		sif.insert_to_imports(file_path)
+		# with lock:
+		# 	logging.info('endpoint: {}, player: {} inserted into imports table'
+		# 	.format(bbref_endpoint, player_name)) 
 
 		
 	except Exception as err:
-		if conn is not None:
-			conn.rollback()
-		cur = None
 		raise err
-	finally:
-		if conn:
-			conn.close()	
-
 
 def mproc_insert_matches(season):
 	'''
@@ -152,9 +156,8 @@ def mproc_insert_matches(season):
 		4. Copy CSV to match_import table
 
 	Args: 
-		:param match_html: html of the given match 
-			bs4_html/boxscores/date+hometeam.html
-	
+		:param season: season given in a tuple
+			ex: (2020,)
 	:side effect: csv with match stats
     :return: None
     '''
@@ -174,13 +177,14 @@ def mproc_insert_matches(season):
 			logging.info(season+" season html saved")
 		
 		shd.match_list_to_csv(html)
+
+
 		with lock:
 			logging.info(season+" season matches saved to csv")
 		
 		csv = os.path.join(os.getcwd(),"csv/" + season + "/" \
 			+ "/match_list.html")
-		headers = ['date', 'away', 'away_pts', 'home', 'home_pts']
-		insert_to_imports(cur, csv)
+		sif.insert_to_imports(csv)
 
 		with lock:
 			logging.info(season +": season matches inserted into match_imports")
@@ -197,10 +201,10 @@ def mproc_insert_matches(season):
 			conn.close()
 
 def process_matches(cur, seasons):
-	db_func.truncate_imports(conn)
+	db_func.truncate_imports(cur)
 
 	lock = Lock()
-	pool_size = cpu_count()
+	pool_size = cpu_count()-1
 	print(f'starting computations on {pool_size} cores')
 	with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
 		pool.map(mproc_insert_matches, seasons)
@@ -208,30 +212,35 @@ def process_matches(cur, seasons):
 
 def process_players(cur, seasons):
 	#truncate imports
-	db_func.truncate_imports(conn)
-
 	save_player_endpoints(seasons)
 	endpoints = get_player_endpoints()
 
 	if DEBUG:
 		print(endpoints)
 	lock = Lock()
-	pool_size = cpu_count()
+	pool_size = 1
 	with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
 		pool.starmap(mproc_insert_players, ((key,val) for key, val in endpoints.items()))
-		sif.imports_to_player(cur)
-		sif.imports_to_player_team(cur)
+	sif.imports_to_player(cur)
+	sif.imports_to_player_team(cur)
 
-def get_teams(season):
+def get_teams(season=0):
 	#Do not use % operator to format query directly (prone to SQL injections)
 	conn = db_func.get_conn()
 	cur = conn.cursor()
-	query = \
-		'''SELECT symbol
-			FROM team
-			WHERE %s >= created
-			AND %s < inactive ;'''
-	cur.execute(query, (season, season))
+
+	if season == 0:
+		query = \
+		'''SELECT team_id
+			FROM team'''
+		cur.execute(query)
+	else:
+		query = \
+			'''SELECT team_id
+				FROM team
+				WHERE %s >= created
+				AND %s < inactive ;'''
+		cur.execute(query, (season, season))
 	teams = cur.fetchall()
 	teams = [teams[i][0] for i in range(len(teams))]
 	conn.close()
@@ -264,15 +273,13 @@ def save_player_endpoints(seasons):
 		with open('csv/player_list.csv', newline='', mode='w+') as f:
 			f.truncate()
 
-		pool_size = cpu_count()
+		pool_size = cpu_count()-1
 		if DEBUG:
 			pool_size = 1
 		lock = Lock()
 		
 		for s in seasons:
-			print([s])
 			teams = get_teams(s)
-			print(teams)
 			with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
 				pool.starmap(mproc_save_player_endpoints, list(itertools.product(teams, [s])))
 		
@@ -299,18 +306,22 @@ def run_scraper():
 	try:
 		conn = db_func.get_conn()
 		cur = conn.cursor()
-
+		conn.autocommit = True
 		team_list_path = 'db_src/NBA_Teams.csv'
-		insert_seasons(cur)
+		sif.insert_seasons(cur)
 		seasons = get_all_seasons(cur)
 		seasons = [(str(seasons[i][0]),)for i in range(len(seasons))]
-		insert_teams(team_list_path,cur)
+		print(seasons)
+		print(len(get_teams(seasons[0][0])))
+		if len(get_teams(seasons[0][0])) <= 0:
+			sif.insert_teams(team_list_path,cur)
 
-		db_func.truncate_imports(conn)
+		db_func.truncate_imports(cur)
 		start = timer()
 		
-		process_matches(cur, seasons)
-		logging.info("match table updated with match_imports")	
+		#process_matches(cur, seasons)
+		process_players(cur, seasons)
+		logging.info("All players inserted")	
 			
 	
 		

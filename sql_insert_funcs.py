@@ -23,11 +23,17 @@ def insert_teams(csv, cur):
 		headers = headers.lstrip().rstrip().split(',')
 		cur.copy_from(f, 'team', columns=headers,sep=',')
 
-def insert_to_imports(csv, cur):
+def insert_to_imports(csv):
+	conn = db_func.get_conn()
+	conn.commit()
+	cur = conn.cursor()
 	with open(csv, 'r') as f: 
 		headers = next(f)
 		headers = headers.lstrip().rstrip().split(',')
+		#print(headers)
 		cur.copy_from(f, 'imports', columns=headers,sep=',')
+	conn.commit()
+	conn.close()
 
 def imports_to_team(csv, cur):
 	try:
@@ -115,7 +121,7 @@ def imports_to_player_team(cur):
 
 def insert_seasons(cur):
 	try:
-		seasons = [[i] for i in(range(2005,2022))]
+		seasons = [[i] for i in(range(2006,2022))]
 		cur.executemany('''INSERT INTO season (year)
 							VALUES (%s)
 							ON CONFLICT (year) DO NOTHING;''', seasons)

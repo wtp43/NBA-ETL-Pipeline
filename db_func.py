@@ -4,13 +4,9 @@ import db_config
 from psycopg2 import OperationalError, errorcodes, errors, Error
 import sys
 
-def truncate_imports(conn):
+def truncate_imports(cur):
 	try:
-		cur = conn.cursor()
-		cur.execute('TRUNCATE TABLE player_performance_imports;')
-		cur.execute('TRUNCATE TABLE match_imports;')
-		#cur.execute('TRUNCATE TABLE team_performance_imports;')
-		cur.close()
+		cur.execute('TRUNCATE TABLE imports;')
 	except Exception as err:
 		raise err
 

@@ -17,9 +17,9 @@ MEM,Memphis Grizzlies,0,0,3000
 MIA,Miami Heat,0,0,3000
 MIL,Milwaukee Bucks,0,0,3000
 MIN,Minnesota Timberwolves,0,0,3000
-NOP,New Orleans Pelicans,0,2013,3000
+NOP,New Orleans Pelicans,0,2014,3000
 NYK,New York Knicks,0,0,3000
-OKC,Oklahoma City Thunder,0,0,3000
+OKC,Oklahoma City Thunder,0,2009,3000
 ORL,Orlando Magic,0,0,3000
 PHI,Philadelphia 76ers,0,0,3000
 PHO,Phoenix Suns,0,0,3000
@@ -31,5 +31,6 @@ UTA,Utah Jazz,0,0,3000
 WAS,Washington Wizards,0,0,3000
 CHA,Charlotte Bobcats,0,0,2015
 NJN,New Jersey Nets,0,0,2013
-NOH,New Orleans Hornets,0,2008,2013
-NOK,New Orleans/Oklahoma City Hornets,0,0,2008
+NOH,New Orleans Hornets,0,2008,2014
+NOK,New Orleans/Oklahoma City Hornets,0,2006,2008
+SEA,Seattle Supersonics,0,0,2009

@@ -9,6 +9,7 @@ import numpy
 import pandas as pd
 import time
 import db_func
+import logging
 
 DEBUG = False
 pd.options.display.max_columns = None
@@ -37,17 +38,20 @@ def player_data_to_csv(html, bbref_endpoint, player_name):
     :return: None
     """
 	try:
+		file_path = 'csv' + bbref_endpoint[:-5] + '.csv'
+		if os.path.isfile(file_path):
+			return 0
 		with open(html, 'r', encoding="utf8") as f:
 			contents = f.read()
 			soup = BeautifulSoup(contents, 'lxml')
 		table = soup.find_all('table', attrs={'id': 'per_game'})
+		if not table:
+			return 1
 		df = pd.read_html(str(table), flavor='bs4', header=[0])[0]
 		df.columns = df.columns.str.lower()
 		df.columns = [s.replace('%', '_pct') for s in df.columns]
 		df.columns = [s.replace('3', 'three') for s in df.columns]
 		df.columns = [s.replace('2', 'two') for s in df.columns]
-
-		df.columns
 
 		if DEBUG:
 			print(df)
@@ -60,8 +64,13 @@ def player_data_to_csv(html, bbref_endpoint, player_name):
 		df['pos'] = df['pos'].apply(lambda x: x.replace(',', ':'))
 		df['bbref_endpoint'] = bbref_endpoint
 		df['player_name'] = player_name
-		df.rename(columns={'team': 'team_id'}, inplace=True)
+		df.rename(columns={'team': 'team_id', 'tm':'team_id'}, inplace=True)
 
+		#Drop rows where player did not play(invalid team_id = Did not Play)
+		df = df[df['team_id'].map(len)==3]
+		df = df[df['team_id'] != 'TOT']
+		df.fillna(0, inplace=True)
+		df.replace('', 0, inplace=True)
 		directory = 'csv' + re.findall('/players/[a-z]{1}',bbref_endpoint)[0]
 
 		if not os.path.isdir(directory):
@@ -69,6 +78,7 @@ def player_data_to_csv(html, bbref_endpoint, player_name):
 		
 		file_path = 'csv' + bbref_endpoint[:-5] + '.csv'
 		df.to_csv(file_path, mode='w+',index=False, header=True)
+		return 0
 	except Exception as err:
 		raise err
 
@@ -84,10 +94,13 @@ def get_endpoints_df(html):
 
 		trs = roster_table.find_all('tr')
 		for i in range(1,len(trs)):
-			names.append(trs[i].a.text)
-			endpoints.append(trs[i].a['href'])
+			#Only add players that are playing/active
+			#(active = has player/jersey number)
+			if trs[i].th.text != '':
+				names.append(trs[i].a.text)
+				endpoints.append(trs[i].a['href'])
 
-
+		print(names)
 		df = DataFrame(list(zip(endpoints, names)))
 		return df
 	except Exception as err:
@@ -105,7 +118,8 @@ def save_html(url, file):
 	:side effect: saves the respective html page in file
     :return: None
     """
-	if os.path.isfile(file):
+	if os.path.isfile(file) and os.stat('somefile.txt').st_size !=0:
+		logging.info(file +": has already been scraped before")
 		return
 	try:
 		exception = True
@@ -116,7 +130,6 @@ def save_html(url, file):
 				exception = False
 			except requests.exceptions.RequestException as e:
 				print(e)
-				time.sleep(20)
 				exception = True
 		if not os.path.isdir("bs4_html"):
 			os.makedirs("bs4_html")
@@ -177,7 +190,6 @@ def match_list_to_csv(match_list_html):
 					exception = False
 				except requests.exceptions.RequestException as e:
 					print(e)
-					time.sleep(20)
 					exception = True
 			table = soup.find_all('table', attrs={'id': 'schedule'})
 			df = pd.read_html(str(table), flavor='bs4', header=[0])[0]
