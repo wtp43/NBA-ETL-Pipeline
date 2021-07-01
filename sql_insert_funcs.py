@@ -16,7 +16,6 @@ import itertools
 import csv
 from pandas.core.frame import DataFrame
 
-
 def insert_teams(csv, cur):
 	with open(csv, 'r') as f: 
 		headers = next(f)
@@ -35,7 +34,7 @@ def insert_to_imports(csv):
 	conn.commit()
 	conn.close()
 
-def imports_to_team(csv, cur):
+def imports_to_team(cur):
 	try:
 		query = \
 		'''INSERT INTO team
@@ -57,16 +56,18 @@ def imports_to_match(cur):
 	try:
 		query = \
 		'''INSERT INTO match
-			(date, away_pts, home_pts, away, home, elevation)
+			(date, away_pts, home_pts, away_id, home_id, 
+			playoff_game, elevation)
 			SELECT im.date, im.away_pts, im.home_pts,
-				im.away, im.home, im.elevation
+				im.away_id, im.home_id, im.playoff_game,
+				im.elevation
 			FROM imports as im
 			WHERE NOT EXISTS
 				(SELECT *
 					FROM match AS m, imports as im
 					WHERE m.date = im.date
-						AND m.away = im.away
-						AND m.home = im.home);'''
+						AND m.away_id = im.away_id
+						AND m.home_id = im.home_id);'''
 		cur.execute(query)
 	except Error as err:
 		raise err

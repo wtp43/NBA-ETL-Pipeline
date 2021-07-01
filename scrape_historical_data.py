@@ -15,16 +15,21 @@ DEBUG = False
 pd.options.display.max_columns = None
 pd.options.display.max_rows = None
 
-team_abbr = {'Atlanta Hawks':'ATL', 'Boston Celtics' : 'BOS', 'Brooklyn Nets': 'NJN',
-			'Charlotte Hornets': 'CHA', 'Chicago Bulls':'CHI','Cleveland Cavaliers':'CLE',
-			'Dallas Mavericks':'DAL','Denver Nuggets':'DEN', 'Detroit Pistons':'DET',
-			'Golden State Warriors':'GSW','Houston Rockets':'HOU','Indiana Pacers':'IND',
-			'Los Angeles Clippers':'LAC','Los Angeles Lakers':'LAL','Memphis Grizzlies':'MEM',
-			'Miami Heat':'MIA','Milwaukee Bucks':'MIL','Minnesota Timberwolves':'MIN',
-			'New Orleans Pelicans':'NOH','New York Knicks':'NYK','Oklahoma City Thunder':'OKC',
-			'Orlando Magic':'ORL','Philadelphia 76ers':'PHI','Phoenix Suns':'PHO',
-			'Portland Trail Blazers':'POR','Sacramento Kings':'SAC','San Antonio Spurs':'SAS',
-			'Toronto Raptors':'TOR','Utah Jazz':'UTA','Washington Wizards':'WAS'}
+def get_team_abbr():
+	conn = db_func.get_conn()
+	cur = conn.cursor()
+	
+	query = \
+		'''SELECT t.team_name, t.team_id
+			FROM team as t;'''
+	cur.execute(query)
+	
+	team_abbr = {}
+	for key, val in cur.fetchall():
+		team_abbr[key] = val
+	conn.close()
+	
+	return team_abbr
 
 def player_data_to_csv(html, bbref_endpoint, player_name):
 	"""
@@ -174,35 +179,54 @@ def match_list_to_csv(match_list_html):
 		match_urls = [re.findall(r'\/leagues\/NBA_[0-9]{4}_games-[A-Za-z]{1,}.html',\
 			 str(match_urls[i]))[0] for i in range(len(match_urls))]
 		season = re.findall('[0-9]{4}', match_list_html)[0]
-		directory = "csv/" + season
+		directory = "csv/" + season + '/'
 		if not os.path.isdir(directory):
 			os.makedirs(directory)
-		file_path = directory+"/"+"match_list.csv"
+		file_path = directory+"/match_list.csv"
 		if os.path.exists(file_path):
 			os.remove(file_path)
+
+		team_abbr = get_team_abbr()
+		regular_game = True
+		playoff_index = 0
+
 		for i in range(len(match_urls)):
 			url = 'http://basketball-reference.com' + match_urls[i]
-			exception = True
-			while(exception):
-				try:
-					response = requests.request("GET", url)
-					soup = BeautifulSoup(response.content, 'html.parser')
-					exception = False
-				except requests.exceptions.RequestException as e:
-					print(e)
-					exception = True
+			html = 'bs4_html/' + match_urls[i]
+			save_html(url, html)
+			with open(html, 'r', encoding="utf8") as f:
+				contents = f.read()
+				soup = BeautifulSoup(contents, 'lxml')
 			table = soup.find_all('table', attrs={'id': 'schedule'})
+
+			if regular_game:
+				playoff_row = soup.find_all('playoff')
+				playoff = soup.find('th', string='Playoffs')
+				if playoff:
+					playoff_row = playoff.find_parent('tr')
+					playoff_index = len(playoff_row.find_previous_siblings('tr'))
+
 			df = pd.read_html(str(table), flavor='bs4', header=[0])[0]
+			
+			playoff_index = df[df['Date']=='Playoffs'].index
+			df['playoff_game'] = 0
+			if not regular_game:
+				df['playoff_game'] = 1
+			elif len(playoff_index):
+				df = df[df.index != playoff_index[0]]
+				df.loc[playoff_index[0]:, 'playoff_game'] = 1
+				regular_game = False
+
 			df.drop(columns=df.columns[[1,6,7,8,9]], inplace=True)
-			df.rename(columns={'Date':'date', 'Visitor/Neutral': 'away', 
-				'Home/Neutral': 'home', 'PTS': 'away_pts', 'PTS.1': 'home_pts'}, inplace=True)
+			df.rename(columns={'Date':'date', 'Visitor/Neutral': 'away_id', 
+				'Home/Neutral': 'home_id', 'PTS': 'away_pts', 'PTS.1': 'home_pts'}, inplace=True)
 
 			df['date'] = pd.to_datetime(df.date)
 			df = df[df['away_pts'].notna()]
 			df['date'] = df['date'].dt.strftime('%Y%m%d')
-			df['away'] = df['away'].apply(lambda x: team_abbr[x])
-			df['home'] = df['home'].apply(lambda x: team_abbr[x])
-			print(df.columns)
+			df['away_id'] = df['away_id'].apply(lambda x: team_abbr[x])
+			df['home_id'] = df['home_id'].apply(lambda x: team_abbr[x])
+			
 			if i == 0:
 				df.to_csv(file_path, mode='a',index=False, header=True)
 			else:
@@ -245,9 +269,10 @@ def match_data_to_csv(match_html):
 		if not os.path.isdir(directory):
 			os.makedirs(directory)
 		file_path = directory+"/"+re.findall("[0-9]{8}[A-Z]{3}", match_html)[0] + ".csv"
-		if os.path.exists(file_path):
-			os.remove(file_path)
-
+		
+		with open(file_path, 'w', encoding="utf8") as f:
+			f.truncate()
+		
 		table = soup.findall('table')
 		for i in range(len(teams)):
 			basic_stat_tag = 'box-' + teams[i] + '-game-basic'
