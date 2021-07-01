@@ -118,7 +118,7 @@ def save_html(url, file):
 	:side effect: saves the respective html page in file
     :return: None
     """
-	if os.path.isfile(file) and os.stat('somefile.txt').st_size !=0:
+	if os.path.isfile(file) and os.stat(file).st_size !=0:
 		logging.info(file +": has already been scraped before")
 		return
 	try:

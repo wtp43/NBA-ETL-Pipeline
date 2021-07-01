@@ -60,15 +60,13 @@ def main():
 		conn = db_func.get_conn()
 		cur = conn.cursor()
 		seasons = ['2021','2020']
-		#test_process_players(cur,seasons )
-		shd.save_html('https://www.basketball-reference.com/players/j/jacksbo01.html',
-			'bs4_html/players/j/jacksbo01.html')
-		shd.player_data_to_csv('bs4_html/players/j/jacksbo01.html', 
-		'/players/j/jacksbo01.html')
-		sif.insert_to_imports('csv/players/j/jacksbo01.csv', cur)
-		# team_list_path = 'db_src/NBA_Teams.csv'
-		# sbrd.insert_teams(team_list_path,cur)
-		conn.commit()
+		html = 'bs4_html/players/l/luety01.html'
+		bbref_endpoint='/players/l/luety01.html'
+		player_name = 'ty'
+		err = shd.player_data_to_csv(html, bbref_endpoint, player_name)
+		print(err)
+
+		print(os.stat(html).st_size)
 	
 	except Exception as err:
 		logging.exception(traceback.print_exception(*sys.exc_info()))
@@ -82,11 +80,14 @@ def test_process_players(cur, season):
 	sbrd.process_players(cur, ['2021'])
 	sbrd.get_player_endpoints()
 
+def populate_team_table(cur):
+	team_list_path = 'db_src/NBA_Teams.csv'
+	sif.insert_teams(team_list_path,cur)
 
 def test_get_teams():
 	for i in range(2010, 2021):
 		teams = sbrd.get_teams(i)
-		assert len(teams) == 30
+		#assert len(teams) == 30
 		print(teams)
 		print(i, len(teams))
 

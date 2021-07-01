@@ -202,7 +202,6 @@ def mproc_insert_matches(season):
 
 def process_matches(cur, seasons):
 	db_func.truncate_imports(cur)
-
 	lock = Lock()
 	pool_size = cpu_count()-1
 	print(f'starting computations on {pool_size} cores')
@@ -218,7 +217,7 @@ def process_players(cur, seasons):
 	if DEBUG:
 		print(endpoints)
 	lock = Lock()
-	pool_size = 1
+	pool_size = cpu_count()-1
 	with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
 		pool.starmap(mproc_insert_players, ((key,val) for key, val in endpoints.items()))
 	sif.imports_to_player(cur)
