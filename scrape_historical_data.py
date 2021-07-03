@@ -247,7 +247,6 @@ def boxscore_to_csv(match_html):
 		teams = re.findall(r"teams\/[A-Z]{3}\/[0-9]{4}", str(line_score_table))
 		#season = teams[0][len(teams[0])-4:]
 		teams = [teams[i][0:len(teams[0])-5].lstrip('teams/') for i in range(len(teams))]
-
 		linescores = re.findall('data-stat="[0-9]" >[0-9]{1,}<', str(line_score_table))
 		linescores = [linescores[i][len(linescores[i])-3:-1] for i in range(len(linescores))]
 		
@@ -255,9 +254,9 @@ def boxscore_to_csv(match_html):
 		if not os.path.isdir(directory):
 			os.makedirs(directory)
 		file_path = directory+"/"+re.findall("[0-9]{9}[A-Z]{3}", match_html)[0] + ".csv"
-		if os.path.isfile(file_path) and os.stat(file_path).st_size !=0:
-			logging.info(file_path +": has already been inserted to a csv")
-			return
+		# if os.path.isfile(file_path) and os.stat(file_path).st_size !=0:
+		# 	logging.info(file_path +": has already been inserted to a csv")
+		# 	return
 		with open(file_path, 'w', encoding="utf8") as f:
 			f.truncate()
 		
@@ -316,7 +315,7 @@ def boxscore_to_csv(match_html):
 			else:
 				# Add injured/inactive players to last (2nd) iteration of dataframe
 				inactive = re.findall("Inactive:.*div", str(soup))
-				inactive = re.findall(">[A-Za-z ]+<", inactive[0])
+				inactive = re.findall('>[^"/<>]+[A-z]+<', inactive[0])
 				inactive = [s.rstrip('<').lstrip('>') for s in inactive]
 				match_date = df.loc[0, 'date']
 				for i in range(len(inactive)):
