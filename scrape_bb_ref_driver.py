@@ -17,7 +17,7 @@ from datetime import date, datetime
 import itertools
 import csv
 from pandas.core.frame import DataFrame
-
+import pandas as pd
 
 DEBUG = False
 
@@ -181,7 +181,7 @@ def mproc_insert_matches(season):
 		sif.insert_to_imports(csv)
 
 		with lock:
-			logging.info(season +": season matches inserted into match_imports")
+			logging.info(season +": season matches inserted into imports table")
 
 	except Exception as err:
 		raise err
@@ -197,7 +197,6 @@ def process_matches(cur, seasons):
 		pool.map(mproc_insert_matches, seasons)
 	sif.imports_to_match(cur)
 
-
 def process_players(cur, seasons):
 	#truncate imports
 	save_player_endpoints(seasons)
@@ -211,6 +210,77 @@ def process_players(cur, seasons):
 		pool.starmap(mproc_insert_players, ((key,val) for key, val in endpoints.items()))
 	sif.imports_to_player(cur)
 	sif.imports_to_player_team(cur)
+
+def process_boxscores(cur):
+	lock = Lock()
+	pool_size = cpu_count()-1
+	matches = get_matches()
+	with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
+		pool.starmap(mproc_insert_boxscores, matches)
+	#sif.imports_to_player_performances(cur)
+
+def mproc_insert_boxscores(date, home_id):
+	'''
+    Wrapper function 
+		1. Save html of match list
+		2. Scrape relevant matches from html 
+		3. Save to CSV
+		4. Copy CSV to match_import table
+
+	Args: 
+		:param season: season given in a tuple
+			ex: (2020,)
+	:side effect: csv with match stats
+    :return: None
+    '''
+	try:
+		date = date.strftime('%Y%m%d')
+		bbref_endpoint = date + '0' + home_id
+		url = "https://www.basketball-reference.com/boxscores/"+bbref_endpoint+".html"
+		html = os.path.join(os.getcwd(),"bs4_html/boxscores/"+bbref_endpoint+".html")
+
+		shd.save_html(url, html)
+		with lock:
+			logging.info(bbref_endpoint+" html saved")
+		
+
+		shd.boxscore_to_csv(html)
+
+		with lock:
+			logging.info(bbref_endpoint+" boxscore saved to csv")
+		
+		csv = os.path.join(os.getcwd(),"csv/boxscores/"+bbref_endpoint+".csv")
+		sif.insert_to_imports(csv)
+		with lock:
+			logging.info(bbref_endpoint+" boxscore inserted into imports table")
+
+	except Exception as err:	
+		logging.error(bbref_endpoint+" boxscore processing failed")
+	return
+
+
+def get_matches(start_date=datetime.fromisoformat('1900-01-01'),
+				end_date=datetime.fromisoformat('2200-12-31')):
+	'''
+	get_matches: returns all matches between 
+	start_date and end_date (inclusive)
+
+	Args: 
+		param start_date: in the form of 
+			200604010 which represents 2006 april 10
+	'''
+	conn = db_func.get_conn()
+	cur = conn.cursor()
+	query = \
+		'''SELECT m.date, m.home_id
+			FROM match as m
+			WHERE %s <= m.date
+			AND %s >= m.date;'''
+	cur.execute(query, (start_date, end_date))
+	matches = cur.fetchall()
+	conn.close()
+	return matches
+
 
 def get_teams(season=0):
 	#Do not use % operator to format query directly (prone to SQL injections)
@@ -245,19 +315,17 @@ def get_player_endpoints():
 def save_player_endpoints(seasons):
 	'''
     Wrapper function 
-		1. 
-		2. 
-		3. Save to CSV
+		1. Scrape all endpoints for teams x seasons
+		2. Save to CSV
 
 	Args: 
-		:param match_html: html of the given match 
-			bs4_html/boxscores/date+hometeam.html
+		:param seasons: a list of seasons
 	
-	:side effect: csv with match stats
+	:side effect: csv with endpoints 
+		(will contain duplicate endpoints)
     :return: None
     '''
 	try:
-		
 		with open('csv/player_list.csv', newline='', mode='w+') as f:
 			f.truncate()
 
@@ -271,14 +339,9 @@ def save_player_endpoints(seasons):
 			with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
 				pool.starmap(mproc_save_player_endpoints, list(itertools.product(teams, [s])))
 		
-
 	except Exception as err:
 		logging.exception(traceback.print_exception(*sys.exc_info()))
 		sys.exit()
-
-
-
-
 
 
 def run_scraper():
@@ -308,7 +371,8 @@ def run_scraper():
 		start = timer()
 		
 		#process_players(cur, seasons)
-		process_matches(cur, seasons)
+		#process_matches(cur, seasons)
+		process_boxscores(cur)
 
 		conn.commit()
 		logging.info("All players inserted")	

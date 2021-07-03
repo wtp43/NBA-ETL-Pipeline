@@ -145,19 +145,6 @@ def save_html(url, file):
 		print(err)
 
 
-def scrape_boxscore_html(team, date):
-	url = "https://www.basketball-reference.com/boxscores/" + date + team + ".html"
-	filename = os.path.join(os.getcwd(),"bs4_html/boxscores/" \
-			+ "/" +date+team+".html")
-	
-
-def save_all_player_performances(season):
-	file_path = 'csv/' + season + '/match_list.csv'
-	df = pd.read_csv(file_path)
-	for index, row in df.iterrows():
-		print(row['date'], row['home'])
-
-
 def match_list_to_csv(match_list_html):
 	"""
     matches_to_csv saves the html page for a given match (boxscores)
@@ -239,7 +226,7 @@ def seconder(x):
     td = timedelta(minutes=mins, seconds=secs)
     return td.total_seconds()
 
-def match_data_to_csv(match_html):
+def boxscore_to_csv(match_html):
 	'''
     match_data_to_csv saves the stats of every player in the match into a csv
 
@@ -251,29 +238,30 @@ def match_data_to_csv(match_html):
     :return: None
     '''
 	try:
+
 		with open(match_html, 'r', encoding="utf8") as f:
 			contents = f.read()
 			soup = BeautifulSoup(contents, 'lxml')
 
-		line_score_table = soup.findall(string=re.compile("div_line_score"))
+		line_score_table = soup.find(string=re.compile("div_line_score"))
 		teams = re.findall(r"teams\/[A-Z]{3}\/[0-9]{4}", str(line_score_table))
-
-		season = teams[0][len(teams[0])-4:]
+		#season = teams[0][len(teams[0])-4:]
 		teams = [teams[i][0:len(teams[0])-5].lstrip('teams/') for i in range(len(teams))]
 
 		linescores = re.findall('data-stat="[0-9]" >[0-9]{1,}<', str(line_score_table))
 		linescores = [linescores[i][len(linescores[i])-3:-1] for i in range(len(linescores))]
-
-
-		directory = "csv/" + season
+		
+		directory = "csv/boxscores"
 		if not os.path.isdir(directory):
 			os.makedirs(directory)
-		file_path = directory+"/"+re.findall("[0-9]{8}[A-Z]{3}", match_html)[0] + ".csv"
-		
+		file_path = directory+"/"+re.findall("[0-9]{9}[A-Z]{3}", match_html)[0] + ".csv"
+		if os.path.isfile(file_path) and os.stat(file_path).st_size !=0:
+			logging.info(file_path +": has already been inserted to a csv")
+			return
 		with open(file_path, 'w', encoding="utf8") as f:
 			f.truncate()
 		
-		table = soup.findall('table')
+		table = soup.find_all('table')
 		for i in range(len(teams)):
 			basic_stat_tag = 'box-' + teams[i] + '-game-basic'
 			advanced_stat_tag = 'box-' + teams[i] + '-game-advanced'
@@ -284,14 +272,17 @@ def match_data_to_csv(match_html):
 			df = pd.read_html(str(table), flavor='bs4', 
 				header=[1], attrs= {'id': advanced_stat_tag})[0]
 
-			df['team_name'] = teams[i]
+			df['team_id'] = teams[i]
 			df['starter'] = 1
 			df['inactive'] = 0
 			df['date'] = re.findall("[0-9]{8}", match_html)[0]
 			starter = True
 			drop_rows = []
-			df.replace({'Did Not Play': 0, 'Nan': 0}, regex=True, inplace=True)
-			basic_df.replace({'Did Not Play': 0, 'Nan': 0}, regex=True, inplace=True)
+
+			df.loc[(df['MP']=='Did Not Play') | 
+				(df['MP'] == 'Did Not Dress') |
+				(df['MP'] == 'Player Suspended') |
+				(df['MP'] == 'Not With Team'), 'MP'] = '0:00'
 
 			for j in range(len(df)):
 				if df.iloc[j,0] == 'Reserves':
@@ -304,7 +295,7 @@ def match_data_to_csv(match_html):
 			df.drop(drop_rows, inplace=True)
 			basic_df.drop(drop_rows, inplace=True)
 			basic_df.drop(['MP', 'Starters'], axis=1, inplace=True)
-
+			
 			df['MP'] = df['MP'].apply(seconder)
 
 			df = pd.concat([df, basic_df], axis = 1)
@@ -315,9 +306,12 @@ def match_data_to_csv(match_html):
 			df.columns = [s.replace('%', '_pct') for s in df.columns]
 			df.columns = [s.replace('3', 'three') for s in df.columns]
 			df.columns = [s.replace('2', 'two') for s in df.columns]
-
-
-			if i ==0:
+			df.replace({'Did Not Play': 0, 
+						'Did Not Dress': 0,
+						'Not With Team': 0,
+						'Player Suspended': 0}, inplace=True)
+			df.fillna(0, inplace=True)
+			if i == 0:
 				df.to_csv(file_path, mode='a',index=False, header=True)
 			else:
 				# Add injured/inactive players to last (2nd) iteration of dataframe
@@ -332,12 +326,13 @@ def match_data_to_csv(match_html):
 						row = [0]*len(df.iloc[0])
 						df.loc[df.index[-1]+1] = row
 						df.loc[df.index[-1],'player_name'] = inactive[i]
-						df.loc[df.index[-1],'team_name'] = team
+						df.loc[df.index[-1],'team_id'] = team
 						df.loc[df.index[-1],'date'] = match_date
 						df.loc[df.index[-1], 'inactive'] = 1
 				df.to_csv(file_path, mode='a',index=False, header=False)
-			
+
 	except Exception as err:
+		logging.error(match_html+" boxscore processing failed")
 		raise err
 
 

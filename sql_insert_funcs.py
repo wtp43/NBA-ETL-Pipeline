@@ -34,6 +34,40 @@ def insert_to_imports(csv):
 	conn.commit()
 	conn.close()
 
+def imports_to_player_performance(cur):
+	try:
+		query = \
+		'''INSERT INTO player_performance
+			(player_id, match_id, team_id, inactive,
+			ts_pct, efg_pct, threepar, ftr, orb_pct,
+			drb_pct, trb_pct, ast_pct, stl_pct, blk_pct,
+			tov_pct, usg_pct, ortg, drtg, bpm, starter, date, 
+			fg, fga, fg_pct, threep, theepa, threepa,
+			threep_pct, ft, fta, ft_pct, orb, drb, trb, ast,
+			stl, blk, tov, pf, pts, pm)
+			SELECT p.player_id, m.match_id, t.team_id, 
+				im.inactive, im.ts_pct, im.efg_pct, im.threepar, 
+				im.ftr, im.orb_pct, im.drb_pct, im.trb_pct, 
+				im.ast_pct, im.stl_pct, im.blk_pct,
+				im.tov_pct, im.usg_pct, im.ortg, im.drtg, 
+				im.bpm, starter, date, im.fg, im.fga, im.fg_pct, 
+				im.threep, im.theepa, im.threepa, im.threep_pct, 
+				im.ft, im.fta, im.ft_pct, im.orb, im.drb, im.trb, im.ast,
+				im.stl, im.blk, im.tov, im.pf, im.pts, im.pm
+			FROM imports as im, p as player, m as match, t as team
+			WHERE im.player_name = p.player_name
+				AND im.team_id = t.team_id
+				AND 
+			
+			AND NOT EXISTS
+				(SELECT *
+					FROM team AS t, imports as im
+					WHERE t.team_id = im.team_id
+					);'''
+		cur.execute(query)
+	except Error as err:
+		raise err	
+
 def imports_to_team(cur):
 	try:
 		query = \

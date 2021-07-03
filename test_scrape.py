@@ -67,49 +67,22 @@ def main():
 		player_name = 'ty'
 		#err = shd.player_data_to_csv(html, bbref_endpoint, player_name)
 		#print(err)
-		directory = "csv/" + '2018'
-		if not os.path.isdir(directory):
-			os.makedirs(directory)
-		file_path = 'csv/2018/match_list.csv'
-		team_abbr = shd.get_team_abbr()
-		regular_game = True
-		playoff_index = 0
 
-		url = 'https://www.basketball-reference.com/leagues/NBA_2018_games-april.html'
-		html = 'bs4_html/leagues/NBA_2018_games-april.html'
-		shd.save_html(url, html)
-		with open(html, 'r', encoding="utf8") as f:
-			contents = f.read()
-			soup = BeautifulSoup(contents, 'lxml')
 
 		
-		table = soup.find_all('table', attrs={'id': 'schedule'})
-		df = pd.read_html(str(table), flavor='bs4', header=[0])[0]
-		playoff_index = df[df['Date']=='Playoffs'].index
-		print(playoff_index)
-		df['playoff_game'] = 0
-		if len(playoff_index):
+		#matches = sbrd.get_matches()
+		#print(matches[0:10])
+		#matches = sbrd.get_matches()
+		#print(len(matches))
 
-			df = df[df.index != playoff_index[0]]
-			df.loc[playoff_index[0]:, 'playoff_game'] = 1
-
-		df.drop(columns=df.columns[[1,6,7,8,9]], inplace=True)
-		df.rename(columns={'Date':'date', 'Visitor/Neutral': 'away_id', 
-			'Home/Neutral': 'home_id', 'PTS': 'away_pts', 'PTS.1': 'home_pts'}, inplace=True)
-
-		df['date'] = pd.to_datetime(df.date)
-		df = df[df['away_pts'].notna()]
-		df['date'] = df['date'].dt.strftime('%Y%m%d')
-		df['away_id'] = df['away_id'].apply(lambda x: team_abbr[x])
-		df['home_id'] = df['home_id'].apply(lambda x: team_abbr[x])
-
+		#shd.boxscore_to_csv('bs4_html/boxscores/201212150CHI.html')	
+		sif.insert_to_imports('csv/boxscores/201312070UTA.csv')
 		#The page that contains the start of playoff table
 		#only needs rows after it modified
 		#While all pages after only contain playoff games
-		df.to_csv(file_path, mode='a',index=False, header=False)
-		print(df)
-		print(playoff_index)
 	
+	
+
 	except Exception as err:
 		logging.exception(traceback.print_exception(*sys.exc_info()))
 		sys.exit()

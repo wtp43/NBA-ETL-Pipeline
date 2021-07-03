@@ -23,7 +23,6 @@ def main():
 		db_func.exec_query(conn, db_schema.create_match_table)
 		db_func.exec_query(conn, db_schema.create_injury_table)
 
-		db_func.exec_query(conn, db_schema.create_player_performance_import_table)
 		db_func.exec_query(conn, db_schema.create_imports_table)
 		db_func.exec_query(conn, db_schema.create_player_performance_table)
 
