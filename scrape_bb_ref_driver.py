@@ -26,7 +26,6 @@ def init_child(lock_):
 	lock = lock_
 
 
-
 def get_match_list_csvs(seasons):
 	try:
 		all_files = []
@@ -37,7 +36,6 @@ def get_match_list_csvs(seasons):
 	except Exception as err:
 		raise err
 	return all_files
-
 
 
 def get_all_matches(cur):
@@ -53,15 +51,12 @@ def get_all_matches(cur):
 def get_all_seasons(cur):
 	try:
 		select_matches_query = \
-		'''SELECT year
+		'''SELECT season
 		FROM season;'''
 		cur.execute(select_matches_query)
 		return list(cur.fetchall())
 	except Error as err:
 		raise err
-
-
-#def insert_players(cur):
 
 
 def mproc_save_player_endpoints(team,season):
@@ -95,9 +90,9 @@ def mproc_save_player_endpoints(team,season):
 			df.to_csv(csv, mode='a+',index=False, header=False)
 
 	except Exception as err:
-		logging.info("mproc_save_player_endpoints: {}, {}".format(team, season))
-
+		logging.error("mproc_save_player_endpoints error: {}, {}".format(team, season))
 		raise err
+
 
 def mproc_insert_players(bbref_endpoint, player_name):
 	'''
@@ -217,7 +212,7 @@ def process_boxscores(cur):
 	matches = get_matches()
 	with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
 		pool.starmap(mproc_insert_boxscores, matches)
-	#sif.imports_to_player_performances(cur)
+	sif.imports_to_player_performance(cur)
 
 def mproc_insert_boxscores(date, home_id):
 	'''
@@ -326,6 +321,8 @@ def save_player_endpoints(seasons):
     :return: None
     '''
 	try:
+		if not os.path.isfile('csv'):
+			os.makedirs('csv')
 		with open('csv/player_list.csv', newline='', mode='w+') as f:
 			f.truncate()
 
@@ -359,27 +356,30 @@ def run_scraper():
 		cur = conn.cursor()
 		conn.autocommit = True
 		team_list_path = 'db_src/NBA_Teams.csv'
-		sif.insert_seasons(cur)
+		seasons_path = 'db_src/seasons.csv'
 		seasons = get_all_seasons(cur)
+		if len(seasons) == 0:
+			sif.insert_seasons(seasons_path,cur)
+			seasons = get_all_seasons(cur)
 		seasons = [(str(seasons[i][0]),)for i in range(len(seasons))]
-		print(seasons)
-		print(len(get_teams(seasons[0][0])))
+		
+		if DEBUG:
+			print(seasons)
+			print(len(get_teams(seasons[0][0])))
+		
 		if len(get_teams(seasons[0][0])) <= 0:
 			sif.insert_teams(team_list_path,cur)
 
 		db_func.truncate_imports(cur)
 		start = timer()
 		
-		#process_players(cur, seasons)
-		#process_matches(cur, seasons)
+		process_players(cur, seasons)
+		process_matches(cur, seasons)
 		process_boxscores(cur)
 
 		conn.commit()
 		logging.info("All players inserted")	
 			
-	
-		
-		
 		end = timer()
 		print(f'elapsed time: {end - start}')
 	except Exception as err:

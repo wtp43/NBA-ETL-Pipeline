@@ -65,8 +65,10 @@ create_imports_table = \
 
 create_season_table =\
 	'''CREATE TABLE IF NOT EXISTS season(
-		year	SMALLINT	NOT NULL,
-		PRIMARY KEY(year)
+		season		SMALLINT	NOT NULL,
+		start_date	DATE		NOT NULL,
+		end_date 	DATE 		NOT NULL,
+		PRIMARY KEY(season)
 		);'''
 		
 create_team_table = \
@@ -87,6 +89,7 @@ create_player_table = \
 		PRIMARY KEY(player_id)
 		);'''
 
+#TODO: Modify season as foreign key
 create_player_team_table = \
 	'''CREATE TABLE IF NOT EXISTS player_team(
 		player_id		SERIAL		NOT NULL,
@@ -97,7 +100,7 @@ create_player_team_table = \
 		pos				TEXT,
 		g				REAL,
 		gs				REAL,
-		sp				REAL,
+		mp				REAL,
 		fg				REAL,
 		fga				REAL,
 		fg_pct			REAL,
@@ -193,8 +196,8 @@ create_player_performance_table = \
 		pf				REAL		DEFAULT 0,
 		pts				REAL		DEFAULT 0,
 		pm				REAL		DEFAULT 0,
+		PRIMARY KEY (player_id, match_id), 
 		FOREIGN KEY (player_id) REFERENCES player,
 		FOREIGN KEY (match_id) REFERENCES match,
 		FOREIGN KEY (team_id) REFERENCES team
-
 		);'''

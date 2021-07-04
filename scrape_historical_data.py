@@ -76,8 +76,9 @@ def player_data_to_csv(html, bbref_endpoint, player_name):
 		df = df[df['team_id'] != 'TOT']
 		df.fillna(0, inplace=True)
 		df.replace('', 0, inplace=True)
+		
 		directory = 'csv' + re.findall('/players/[a-z]{1}',bbref_endpoint)[0]
-
+		
 		if not os.path.isdir(directory):
 			os.makedirs(directory)
 		
