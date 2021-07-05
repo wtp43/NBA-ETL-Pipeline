@@ -352,6 +352,7 @@ def run_scraper():
 							logging.StreamHandler()])	
 
 	try:
+		start = timer()
 		conn = db_func.get_conn()
 		cur = conn.cursor()
 		conn.autocommit = True
@@ -371,10 +372,11 @@ def run_scraper():
 			sif.insert_teams(team_list_path,cur)
 
 		db_func.truncate_imports(cur)
-		start = timer()
-		
 		process_players(cur, seasons)
+		db_func.truncate_imports(cur)
 		process_matches(cur, seasons)
+		db_func.truncate_imports(cur)
+
 		process_boxscores(cur)
 
 		conn.commit()
