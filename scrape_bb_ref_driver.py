@@ -321,7 +321,7 @@ def save_player_endpoints(seasons):
     :return: None
     '''
 	try:
-		if not os.path.isfile('csv'):
+		if not os.path.isdir('csv'):
 			os.makedirs('csv')
 		with open('csv/player_list.csv', newline='', mode='w+') as f:
 			f.truncate()
