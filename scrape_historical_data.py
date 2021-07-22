@@ -15,12 +15,13 @@ DEBUG = False
 pd.options.display.max_columns = None
 pd.options.display.max_rows = None
 
+# Returns dictionary dict["Team Name"] = "Team Abbr"
 def get_team_abbr():
 	conn = db_func.get_conn()
 	cur = conn.cursor()
 	
 	query = \
-		'''SELECT t.team_name, t.team_id
+		'''SELECT DISTINCT t.team_name, t.team_abbr
 			FROM team as t;'''
 	cur.execute(query)
 	
@@ -69,11 +70,11 @@ def player_data_to_csv(html, bbref_endpoint, player_name):
 		df['pos'] = df['pos'].apply(lambda x: x.replace(',', ':'))
 		df['bbref_endpoint'] = bbref_endpoint
 		df['player_name'] = player_name
-		df.rename(columns={'team': 'team_id', 'tm':'team_id'}, inplace=True)
+		df.rename(columns={'team': 'team_abbr', 'tm':'team_abbr'}, inplace=True)
 
 		#Drop rows where player did not play(invalid team_id = Did not Play)
-		df = df[df['team_id'].map(len)==3]
-		df = df[df['team_id'] != 'TOT']
+		df = df[df['team_abbr'].map(len)==3]
+		df = df[df['team_abbr'] != 'TOT']
 		df.fillna(0, inplace=True)
 		df.replace('', 0, inplace=True)
 		
@@ -206,14 +207,14 @@ def match_list_to_csv(match_list_html):
 				regular_game = False
 
 			df.drop(columns=df.columns[[1,6,7,8,9]], inplace=True)
-			df.rename(columns={'Date':'date', 'Visitor/Neutral': 'away_id', 
-				'Home/Neutral': 'home_id', 'PTS': 'away_pts', 'PTS.1': 'home_pts'}, inplace=True)
+			df.rename(columns={'Date':'date', 'Visitor/Neutral': 'away_abbr', 
+				'Home/Neutral': 'home_abbr', 'PTS': 'away_pts', 'PTS.1': 'home_pts'}, inplace=True)
 
 			df['date'] = pd.to_datetime(df.date)
 			df = df[df['away_pts'].notna()]
 			df['date'] = df['date'].dt.strftime('%Y%m%d')
-			df['away_id'] = df['away_id'].apply(lambda x: team_abbr[x])
-			df['home_id'] = df['home_id'].apply(lambda x: team_abbr[x])
+			df['away_abbr'] = df['away_abbr'].apply(lambda x: team_abbr[x])
+			df['home_abbr'] = df['home_abbr'].apply(lambda x: team_abbr[x])
 			
 			if i == 0:
 				df.to_csv(file_path, mode='a',index=False, header=True)
@@ -272,7 +273,7 @@ def boxscore_to_csv(match_html):
 			df = pd.read_html(str(table), flavor='bs4', 
 				header=[1], attrs= {'id': advanced_stat_tag})[0]
 
-			df['team_id'] = teams[i]
+			df['team_abbr'] = teams[i]
 			df['starter'] = 1
 			df['inactive'] = 0
 			df['date'] = re.findall("[0-9]{8}", match_html)[0]
@@ -326,7 +327,7 @@ def boxscore_to_csv(match_html):
 						row = [0]*len(df.iloc[0])
 						df.loc[df.index[-1]+1] = row
 						df.loc[df.index[-1],'player_name'] = inactive[i]
-						df.loc[df.index[-1],'team_id'] = team
+						df.loc[df.index[-1],'team_abbr'] = team
 						df.loc[df.index[-1],'date'] = match_date
 						df.loc[df.index[-1], 'inactive'] = 1
 				df.to_csv(file_path, mode='a',index=False, header=False)

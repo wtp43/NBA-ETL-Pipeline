@@ -214,7 +214,7 @@ def process_boxscores(cur):
 		pool.starmap(mproc_insert_boxscores, matches)
 	sif.imports_to_player_performance(cur)
 
-def mproc_insert_boxscores(date, home_id):
+def mproc_insert_boxscores(date, home_abbr):
 	'''
     Wrapper function 
 		1. Save html of match list
@@ -230,7 +230,7 @@ def mproc_insert_boxscores(date, home_id):
     '''
 	try:
 		date = date.strftime('%Y%m%d')
-		bbref_endpoint = date + '0' + home_id
+		bbref_endpoint = date + '0' + home_abbr
 		url = "https://www.basketball-reference.com/boxscores/"+bbref_endpoint+".html"
 		html = os.path.join(os.getcwd(),"bs4_html/boxscores/"+bbref_endpoint+".html")
 
@@ -267,7 +267,7 @@ def get_matches(start_date=datetime.fromisoformat('1900-01-01'),
 	conn = db_func.get_conn()
 	cur = conn.cursor()
 	query = \
-		'''SELECT m.date, m.home_id
+		'''SELECT m.date, m.home_abbr
 			FROM match as m
 			WHERE %s <= m.date
 			AND %s >= m.date;'''
@@ -276,7 +276,8 @@ def get_matches(start_date=datetime.fromisoformat('1900-01-01'),
 	conn.close()
 	return matches
 
-
+#Currently only gets all teams for one season
+#Returns team abbreviations
 def get_teams(season=0):
 	#Do not use % operator to format query directly (prone to SQL injections)
 	conn = db_func.get_conn()
@@ -284,14 +285,14 @@ def get_teams(season=0):
 
 	if season == 0:
 		query = \
-		'''SELECT team_id
+		'''SELECT team_abbr
 			FROM team'''
 		cur.execute(query)
 	else:
 		query = \
-			'''SELECT team_id
+			'''SELECT team_abbr
 				FROM team
-				WHERE %s >= created
+				WHERE %s >= active
 				AND %s < inactive ;'''
 		cur.execute(query, (season, season))
 	teams = cur.fetchall()

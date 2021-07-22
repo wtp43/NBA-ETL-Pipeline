@@ -1,36 +1,37 @@
-team_id,team_name,home_arena_elevation,created,inactive
-ATL,Atlanta Hawks,0,0,3000
-BOS,Boston Celtics,0,0,3000
-BRK,Brooklyn Nets,0,2013,3000
-CHO,Charlotte Hornets,0,2015,3000
-CHI,Chicago Bulls,0,0,3000
-CLE,Cleveland Cavaliers,0,0,3000
-DAL,Dallas Mavericks,0,0,3000
-DEN,Denver Nuggets,0,0,3000
-DET,Detroit Pistons,0,0,3000
-GSW,Golden State Warriors,0,0,3000
-HOU,Houston Rockets,0,0,3000
-IND,Indiana Pacers,0,0,3000
-LAC,Los Angeles Clippers,0,0,3000
-LAL,Los Angeles Lakers,0,0,3000
-MEM,Memphis Grizzlies,0,0,3000
-MIA,Miami Heat,0,0,3000
-MIL,Milwaukee Bucks,0,0,3000
-MIN,Minnesota Timberwolves,0,0,3000
-NOP,New Orleans Pelicans,0,2014,3000
-NYK,New York Knicks,0,0,3000
-OKC,Oklahoma City Thunder,0,2009,3000
-ORL,Orlando Magic,0,0,3000
-PHI,Philadelphia 76ers,0,0,3000
-PHO,Phoenix Suns,0,0,3000
-POR,Portland Trail Blazers,0,0,3000
-SAC,Sacramento Kings,0,0,3000
-SAS,San Antonio Spurs,0,0,3000
-TOR,Toronto Raptors,0,0,3000
-UTA,Utah Jazz,0,0,3000
-WAS,Washington Wizards,0,0,3000
-CHA,Charlotte Bobcats,0,0,2015
-NJN,New Jersey Nets,0,0,2013
-NOH,New Orleans Hornets,0,2008,2014
-NOK,New Orleans/Oklahoma City Hornets,0,2006,2008
-SEA,Seattle SuperSonics,0,0,2009
+team_id,team_abbr,team_name,active,inactive
+1,ATL,Atlanta Hawks,0,3000
+2,BOS,Boston Celtics,0,3000
+3,BRK,Brooklyn Nets,2013,3000
+4,CHO,Charlotte Hornets,2015,3000
+5,CHI,Chicago Bulls,0,3000
+6,CLE,Cleveland Cavaliers,0,3000
+7,DAL,Dallas Mavericks,0,3000
+8,DEN,Denver Nuggets,0,3000
+9,DET,Detroit Pistons,0,3000
+10,GSW,Golden State Warriors,0,3000
+11,HOU,Houston Rockets,0,3000
+12,IND,Indiana Pacers,0,3000
+13,LAC,Los Angeles Clippers,0,3000
+14,LAL,Los Angeles Lakers,0,3000
+15,MEM,Memphis Grizzlies,0,3000
+16,MIA,Miami Heat,0,3000
+17,MIL,Milwaukee Bucks,0,3000
+18,MIN,Minnesota Timberwolves,0,3000
+19,NOP,New Orleans Pelicans,2014,3000
+20,NYK,New York Knicks,0,3000
+21,OKC,Oklahoma City Thunder,2009,3000
+22,ORL,Orlando Magic,0,3000
+23,PHI,Philadelphia 76ers,0,3000
+24,PHO,Phoenix Suns,0,3000
+25,POR,Portland Trail Blazers,0,3000
+26,SAC,Sacramento Kings,0,3000
+27,SAS,San Antonio Spurs,0,3000
+28,TOR,Toronto Raptors,0,3000
+29,UTA,Utah Jazz,0,3000
+30,WAS,Washington Wizards,0,3000
+4,CHA,Charlotte Bobcats,0,2015
+3,NJN,New Jersey Nets,0,2013
+19,NOH,New Orleans Hornets,2008,2014
+19,NOK,New Orleans/Oklahoma City Hornets,2006,2008
+21,SEA,Seattle SuperSonics,0,2009
+19,NOH,New Orleans Hornets,2003,2006
