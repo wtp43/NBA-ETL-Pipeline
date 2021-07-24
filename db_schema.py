@@ -165,6 +165,7 @@ create_player_performance_table = \
 		match_id		SERIAL		NOT NULL,
 		team_abbr		TEXT		NOT NULL,
 
+		sp				REAL		DEFAULT 0,
 		inactive 		REAL		DEFAULT 0,
 		ts_pct			REAL		DEFAULT 0,
 		efg_pct			REAL		DEFAULT 0,
