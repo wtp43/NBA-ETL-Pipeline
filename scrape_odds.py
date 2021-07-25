@@ -1,76 +1,131 @@
-import pprint
 from datetime import datetime
 import pandas as pd
 pd.options.display.max_columns = None
 pd.options.display.max_rows = None
-import json
-from pysbr import *
+import time
 
-def scrape_odds():
+from pysbr import EventsByDateRange, CurrentLines, NBA, Sportsbook, Team, EventsByEventIds
+from datetime import datetime, timedelta
+import db_func
+import os
+from os import listdir
+from os.path import isfile, join
+from tqdm import tqdm
+import sql_insert_funcs as sif
+
+team_id = {'Atlanta': 1, 'Boston':2, 'Brooklyn': 3, 'New Jersey':3, 'Charlotte':4,
+			'Chicago':5, 'Cleveland':6, 'Dallas':7, 'Denver':8, 'Detroit':9,
+			'Golden State':10, 'Houston':11, 'Indiana':12, 'L.A. Clippers': 13,
+			'L.A. Lakers':14, 'Memphis':15, 'Miami':16, 'Milwaukee':17, 
+			'Minnesota':18, 'New Orleans':19, 'New York': 20, 'Oklahoma': 21,
+			'Oklahoma City': 21,'Seattle':21, 'Orlando':22, 'Philadelphia':23, 
+			'Phoenix':24,'Portland':25, 'Sacramento':26, 'San Antonio':27, 
+			'Toronto':28,'Utah':29, 'Washington':30, 'Baltimore':30,
+			'Atlanta Hawks': 1, 'Boston Celtics':2, 'Brooklyn Nets': 3, 
+			'New Jersey Nets':3, 'Charlotte Hornets':4,'Chicago Bulls':5, 
+			'Cleveland Cavaliers':6, 'Dallas Mavericks':7, 
+			'Denver Nuggets':8, 'Detroit Pistons':9,'Golden State Warrios':10, 
+			'Houston Rockets':11, 'Indiana Pacers':12, 
+			'L.A. Clippers': 13,'L.A. Lakers':14, 'Memphis Grizzlies':15, 'Miami Heat':16, 
+			'Milwaukee Bucks':17, 'Minnesota Timberwolves':18, 'New Orleans Pelicans':19, 
+			'New York Knicks': 20, 'Oklahoma City Thunder': 21,'Orlando Magic':22, 
+			'Philadelphia 76ers':23, 'Phoenix Suns':24,'Portland Trail Blazers':25, 
+			'Sacramento Kings':26, 'San Antonio':27, 'Toronto Raptors':28,
+			'Utah Jazz':29, 'Washington Wizards':30, 'LA Clippers': 13, 'LA Lakers':14}
+
+def get_team_id(team):
+	return team_id[team]
+
+def get_home(team):
+	return team_id[team.split('@')[1]]
+
+def get_away(team):
+	return team_id[team.split('@')[0]]
+
+def get_odds(season, start_date, end_date, market_id):
+	csv = f'odds/{season}_{market_id}.csv'
+	if not os.path.isdir('odds'):
+		os.makedirs('odds')
+	if os.path.isfile(csv):
+		return
 	nba = NBA()
-	start_date = datetime.strptime('20061105', '%Y%m%d')
-	end_date = datetime.strptime('20061106', '%Y%m%d')
-
+	nba_market_ids= nba.market_ids(market_id)
 	sb = Sportsbook()
-	lm = LeagueMarkets(nba.league_id)
-	#print(lm.list())
+	sb_ids = sb.ids(['pinnacle', 'bet365'])
+	days = (end_date - start_date).days
+	weeks = days // 7 + 2
+	lines_dataframes = []
+	start_date = datetime(start_date.year, start_date.month, start_date.day)
 
-	#missing odds
-	#Insert first allowing nulls in database
-	#skip these matches in strategy backtest
+	for i in tqdm(range(0, weeks), colour='green', position=0):
+		tqdm.write(f'''Retrieving {market_id} lines for games in range [{start_date + timedelta((i-1)*7)}, {start_date + timedelta(i*7)}]''')
+		time.sleep(1)
+		e = EventsByDateRange(nba.league_id, 
+			start_date + timedelta(days=(i-1)*7), 
+			start_date + timedelta(days=i*7))
+		cl = CurrentLines(e.ids(), nba_market_ids, sb_ids)
+		lines_dataframes.append(cl.dataframe(e))
 
-	# nba_league = py.LeagueHierarchy(nba.league_id)
-	# json_dict = nba_league.list()
-	# formatted_json_str = pprint.pformat(json_dict)
-	# pprint.pprint(json_dict)
-	#print(nba_league.list())
-	# teams = []
-	e = EventsByDateRange(nba.league_id, start_date, end_date)
-	# for i in range(len(e.list())):
-	# 	q = e.list()[i]['participants']
-	# 	teams.extend([(k['source']['abbreviation'], k['participant id']) for k in q])
-	json.dump(e.list(), open( "odds/matches.json", 'w' ))
-	#data = json.load( open( "file_name.json" ) )
-	i = 0
-	participants = [j['participant id'] for j in e.list()[i]['participants']]
-	for i in range(len(e.list())):
-		event_id = e.list()[i]['event id']
-		#print(event_id)
-		eventmarkets = EventMarkets(24221)
-		#print(eventmarkets.list())
+	combined = pd.concat(lines_dataframes)
 
+	if not combined.empty:
+		combined = combined.loc[combined['participant score'].notnull(),:]
+		combined = combined.loc[combined['participant'].notnull(),:]
+		combined.rename(columns={'participant': 'team_abbr', 'datetime':'date',
+								'decimal odds':'decimal_odds', 'spread / total': 'spread',
+								'american odds':'vegas_odds'}, 
+								inplace=True)
+		combined['date'] = pd.to_datetime(combined["date"])
+		combined['date'] = combined['date'].map(lambda x: x.date())
 
-	#print(participants)
+		combined['home_team'] = combined['event'].map(lambda x: x.split('@')[1])
+		combined['away_team'] = combined['event'].map(lambda x: x.split('@')[0])
 
-	#print(e.dataframe())
-	# #pprint.pprint(json_dict)
-	# print(set(teams))
+		combined['home_team_exists'] = combined['home_team'].map(lambda x: x in team_id)
+		combined['away_team_exists'] = combined['away_team'].map(lambda x: x in team_id)								
 
-	
-	#print(Current(e.list()[0]))
-	market_ids = LeagueMarkets(nba.league_id).list()
-	market_ids = [d['market id'] for d in market_ids]
-	sb_ids = sb.ids(['pinnacle', 'bodog'])
-	print(market_ids)
+		combined = combined.loc[combined['home_team_exists'] & combined['away_team_exists']]
 
-	for j in range(len(market_ids)):
-		lh = LineHistory(e.list()[0]['event id'], market_ids[j], sb_ids[0], participants)
-		print(lh.list())
-	#print(BestLines(24221, market_ids).list())
+		combined['home_id'] = combined['home_team'].map(get_team_id)
+		combined['away_id'] = combined['away_team'].map(get_team_id)
+
+		combined['home_id'] = combined['event'].map(get_home)
+		combined['away_id'] = combined['event'].map(get_away)
+
+		combined.drop(columns=combined.columns[[0,1,2,4,8,9,10,11,12,15,16,17,18,19]], inplace=True)
+		combined.to_csv(csv,mode='w+', index=False, header=True)
 
 
-	return
+def get_participant(event_id, is_home):
+	time.sleep(1)
+	e = EventsByEventIds(event_id).list()[0]
+	for p in e['participants']:
+		if p['is home'] == is_home:
+			return p['source']['abbreviation']
 
-# def save_obj(obj, name ):
-#     with open('obj/'+ name + '.pkl', 'wb') as f:
-#         pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+def save_odds():
+	conn = db_func.get_conn()
+	cur = conn.cursor()
+	query = ''' SELECT season, start_date, end_date 
+				FROM season'''
+	cur.execute(query)
+	for season, start_date, end_date in tqdm(cur.fetchall(), colour='cyan', position=1):
+		if season < 2007:
+			continue
+		get_odds(season, start_date, end_date, 'ps')
+		get_odds(season, start_date, end_date, 'ml')
+		get_odds(season, start_date, end_date, 'total')
 
-# def load_obj(name ):
-#     with open('obj/' + name + '.pkl', 'rb') as f:
-#         return pickle.load(f)
+	conn.close()
+
+def insert_odds():
+	csvs = [f for f in listdir('odds') if isfile(join('odds', f))]
+	#for csv in tqdm(csvs, colour='magenta', position=1):
+
 
 def main():
-	scrape_odds()
-
+	save_odds()
+	#insert_odds()
+	
 if __name__ == '__main__':
 	main()

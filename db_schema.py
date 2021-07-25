@@ -60,7 +60,14 @@ create_imports_table = \
 		drtg 			REAL		DEFAULT 0,
 		bpm				REAL		DEFAULT 0,
 		starter 		SMALLINT	DEFAULT 0,
-		pm				REAL		DEFAULT 0
+		pm				REAL		DEFAULT 0,
+
+		sportsbook		SERIAL		NOT NULL,
+		spread			REAL		DEFAULT 0,
+		bet_type_id		SERIAL 		NOT NULL,
+		decimal_odds	REAL		,
+		vegas_odds		SMALLINT	,
+		bet_type_desc	TEXT 		NOT NULL
 		);'''
 
 create_season_table =\
@@ -147,6 +154,30 @@ create_match_table = \
 		playoff_game	REAL		NOT NULL,
 		elevation		REAL		DEFAULT 0,
 		PRIMARY KEY (match_id)
+		);'''
+
+create_bet_type_table = \
+	'''CREATE TABLE IF NOT EXISTS bet_type(
+		bet_type_id		SERIAL		NOT NULL,
+		bet_type_desc	TEXT 		NOT NULL,
+		PRIMARY KEY (bet_type_id)
+		);'''
+
+create_odds_table = \
+	'''CREATE TABLE IF NOT EXISTS odds(
+		match_id		SERIAL		NOT NULL,
+		team_id			SERIAL		NOT NULL,
+		date			DATE		NOT NULL,
+
+		spread			REAL		DEFAULT 0,
+		sportsbook		SERIAL		NOT NULL,
+		bet_type_id		SERIAL 		NOT NULL,
+		decimal_odds	REAL		NOT NULL,
+		vegas_odds		SMALLINT	NOT NULL,
+		PRIMARY KEY (match_id, team_id, sportsbook, bet_type_id, date),
+		FOREIGN KEY (match_id) REFERENCES match,
+		FOREIGN KEY (team_id) REFERENCES team,
+		FOREIGN KEY (bet_type_id) REFERENCES bet_type
 		);'''
 
 create_injury_table = \
