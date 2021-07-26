@@ -28,6 +28,9 @@ def main():
 		db_func.exec_query(conn, db_schema.create_imports_table)
 		db_func.exec_query(conn, db_schema.create_player_performance_table)
 
+		db_func.exec_query(conn, db_schema.create_bet_type_table)
+		db_func.exec_query(conn, db_schema.create_odds_table)
+
 
 	
 		conn.commit()

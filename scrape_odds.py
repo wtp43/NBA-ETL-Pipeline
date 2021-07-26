@@ -33,6 +33,8 @@ team_id = {'Atlanta': 1, 'Boston':2, 'Brooklyn': 3, 'New Jersey':3, 'Charlotte':
 			'Sacramento Kings':26, 'San Antonio':27, 'Toronto Raptors':28,
 			'Utah Jazz':29, 'Washington Wizards':30, 'LA Clippers': 13, 'LA Lakers':14}
 
+bet_type_id = {'ml':1, 'ps':2, 'total':3}
+
 def get_team_id(team):
 	return team_id[team]
 
@@ -53,16 +55,16 @@ def get_odds(season, start_date, end_date, market_id):
 	sb = Sportsbook()
 	sb_ids = sb.ids(['pinnacle', 'bet365'])
 	days = (end_date - start_date).days
-	weeks = days // 7 + 2
+	weeks = days // 31 + 2
 	lines_dataframes = []
 	start_date = datetime(start_date.year, start_date.month, start_date.day)
 
-	for i in tqdm(range(0, weeks), colour='green', position=0):
-		tqdm.write(f'''Retrieving {market_id} lines for games in range [{start_date + timedelta((i-1)*7)}, {start_date + timedelta(i*7)}]''')
+	for i in tqdm(range(weeks), colour='green', position=0):
+		tqdm.write(f'''Retrieving {market_id} lines for games in range [{start_date + timedelta((i-1)*31)}, {start_date + timedelta(i*31)}]''')
 		time.sleep(1)
 		e = EventsByDateRange(nba.league_id, 
-			start_date + timedelta(days=(i-1)*7), 
-			start_date + timedelta(days=i*7))
+			start_date + timedelta(days=(i-1)*31), 
+			start_date + timedelta(days=i*31))
 		cl = CurrentLines(e.ids(), nba_market_ids, sb_ids)
 		lines_dataframes.append(cl.dataframe(e))
 
@@ -91,8 +93,14 @@ def get_odds(season, start_date, end_date, market_id):
 
 		combined['home_id'] = combined['event'].map(get_home)
 		combined['away_id'] = combined['event'].map(get_away)
+		
+		combined['bet_type_id'] = bet_type_id[market_id]
 
-		combined.drop(columns=combined.columns[[0,1,2,4,8,9,10,11,12,15,16,17,18,19]], inplace=True)
+		drop_columns = ['market id','event id', 'participant score', 'market','event', 
+						'participant id', 'profit', 'result','home_team', 'away_team', 
+						'sportsbook id', 'participant full name', 'home_team_exists',
+						'away_team_exists']
+		combined.drop(columns=drop_columns, axis=1, inplace=True)
 		combined.to_csv(csv,mode='w+', index=False, header=True)
 
 
@@ -119,13 +127,26 @@ def save_odds():
 	conn.close()
 
 def insert_odds():
-	csvs = [f for f in listdir('odds') if isfile(join('odds', f))]
-	#for csv in tqdm(csvs, colour='magenta', position=1):
+	conn = db_func.get_conn()
+	conn.autocommit = True
+	cur = conn.cursor()
+	query = '''SELECT * 
+			   FROM bet_type'''
+	cur.execute(query)
+	if len(cur.fetchall()) == 0:
+		sif.insert_bet_type('db_src/bet_type.csv', cur)
+		conn.commit()
+	db_func.truncate_imports(cur)
+	csvs = [f'odds/{f}' for f in listdir('odds') if isfile(join('odds', f))]
+	for csv in tqdm(csvs, colour='magenta', position=1):
+		sif.insert_to_imports(csv)
+
+	conn.close()
 
 
 def main():
 	save_odds()
-	#insert_odds()
+	insert_odds()
 	
 if __name__ == '__main__':
 	main()

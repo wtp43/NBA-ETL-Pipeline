@@ -23,17 +23,42 @@ def insert_teams(csv, cur):
 		cur.copy_from(f, 'team', columns=headers,sep=',')
 
 def insert_to_imports(csv):
-	conn = db_func.get_conn()
-	conn.commit()
-	cur = conn.cursor()
+	try:
+		conn = db_func.get_conn()
+		cur = conn.cursor()
+		with open(csv, 'r') as f: 
+			headers = next(f)
+			headers = headers.lstrip().rstrip().split(',')
+			cur.copy_from(f, 'imports', columns=headers,sep=',')
+		conn.commit()
+		conn.close()
+	except Error as err:
+		raise err
+
+def insert_bet_type(csv, cur):
 	with open(csv, 'r') as f: 
 		headers = next(f)
 		headers = headers.lstrip().rstrip().split(',')
-		#print(headers)
-		cur.copy_from(f, 'imports', columns=headers,sep=',')
-	conn.commit()
-	conn.close()
+		cur.copy_from(f, 'bet_type', columns=headers,sep=',')
 
+
+def imports_to_bets(cur):
+	try:
+		query = \
+		'''INSERT INTO team
+			(team_name, team_abbr, home_arena_elevation,
+			 created, inactive)
+			SELECT im.team_name, im.team_abbr, im.home_arena_elevation,
+				im.created, inactive.home
+			FROM imports as im
+			WHERE NOT EXISTS
+				(SELECT *
+					FROM team AS t, imports as im
+					WHERE t.team_abbr = im.team_abbr
+					);'''
+		cur.execute(query)
+	except Error as err:
+		raise err
 
 
 def imports_to_player_performance(cur):
