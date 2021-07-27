@@ -1,0 +1,4 @@
+bet_type_id,bet_type_desc
+1,moneyline (ml)
+2,point spread (ps)
+3,over and under (total)

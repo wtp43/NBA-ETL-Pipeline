@@ -9,12 +9,12 @@ create_imports_table = \
 		home_abbr 		TEXT,
 		elevation		REAL,
 		playoff_game	REAL,
+		team_abbr		TEXT,
 
 		player_name		TEXT,
 		bbref_endpoint 	TEXT,
 		season			REAL,
 		age				REAL,
-		team_abbr		TEXT,
 		lg				TEXT,
 		pos				TEXT,
 		g				REAL,
@@ -62,12 +62,13 @@ create_imports_table = \
 		starter 		SMALLINT	DEFAULT 0,
 		pm				REAL		DEFAULT 0,
 
-		sportsbook		SERIAL		NOT NULL,
-		spread			REAL		DEFAULT 0,
-		bet_type_id		SERIAL 		NOT NULL,
-		decimal_odds	REAL		,
-		vegas_odds		SMALLINT	,
-		bet_type_desc	TEXT 		NOT NULL
+		datetime 		TIMESTAMP WITH TIME ZONE,
+		sportsbook		TEXT,
+		spread			REAL,
+		bet_type_id		SERIAL,
+		decimal_odds	REAL,
+		vegas_odds		REAL	
+
 		);'''
 
 create_season_table =\
@@ -165,18 +166,19 @@ create_bet_type_table = \
 
 create_odds_table = \
 	'''CREATE TABLE IF NOT EXISTS odds(
-		match_id		SERIAL		NOT NULL,
-		team_id			SERIAL		NOT NULL,
-		date			DATE		NOT NULL,
-
-		spread			REAL		DEFAULT 0,
-		sportsbook		SERIAL		NOT NULL,
-		bet_type_id		SERIAL 		NOT NULL,
-		decimal_odds	REAL		NOT NULL,
-		vegas_odds		SMALLINT	NOT NULL,
-		PRIMARY KEY (match_id, team_id, sportsbook, bet_type_id, date),
+		match_id		SERIAL						NOT NULL,
+		team_id			SERIAL								,
+		team_abbr		TEXT						NOT NULL,
+		datetime		TIMESTAMP WITH TIME ZONE	NOT NULL,
+		spread			REAL						DEFAULT 0,
+		sportsbook		TEXT						NOT NULL,
+		bet_type_id		SERIAL 						NOT NULL,
+		decimal_odds	REAL						NOT NULL,
+		vegas_odds		REAL						NOT NULL,
+		
+		PRIMARY KEY (match_id, sportsbook, bet_type_id, 
+					team_abbr, datetime),
 		FOREIGN KEY (match_id) REFERENCES match,
-		FOREIGN KEY (team_id) REFERENCES team,
 		FOREIGN KEY (bet_type_id) REFERENCES bet_type
 		);'''
 

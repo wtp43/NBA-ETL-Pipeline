@@ -25,19 +25,6 @@ def init_child(lock_):
 	global lock
 	lock = lock_
 
-
-def get_match_list_csvs(seasons):
-	try:
-		all_files = []
-		for i in range(len(seasons)):
-			files = ["csv/"+seasons[i] + '/' + f for f in os.listdir("csv/" + seasons[i]) 
-					if (os.path.isfile(os.path.join("csv/"+seasons[i] + '/',f)) and f == 'match_list.csv')]
-			all_files +=files
-	except Exception as err:
-		raise err
-	return all_files
-
-
 def get_all_matches(cur):
 	try:
 		select_matches_query = \
@@ -171,8 +158,8 @@ def mproc_insert_matches(season):
 		with lock:
 			logging.info(season+" season matches saved to csv")
 		
-		csv = os.path.join(os.getcwd(),"csv/" + season \
-			+ "/match_list.csv")
+		csv = os.path.join(os.getcwd(),"csv/match_lists/" + season \
+			+ "_match_list.csv")
 		sif.insert_to_imports(csv)
 
 		with lock:
@@ -374,8 +361,10 @@ def run_scraper():
 
 		db_func.truncate_imports(cur)
 		process_players(cur, seasons)
+		conn.commit()
 		db_func.truncate_imports(cur)
 		process_matches(cur, seasons)
+		conn.commit()
 		db_func.truncate_imports(cur)
 
 		process_boxscores(cur)

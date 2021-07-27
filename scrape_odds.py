@@ -13,27 +13,32 @@ from os.path import isfile, join
 from tqdm import tqdm
 import sql_insert_funcs as sif
 
-team_id = {'Atlanta': 1, 'Boston':2, 'Brooklyn': 3, 'New Jersey':3, 'Charlotte':4,
-			'Chicago':5, 'Cleveland':6, 'Dallas':7, 'Denver':8, 'Detroit':9,
-			'Golden State':10, 'Houston':11, 'Indiana':12, 'L.A. Clippers': 13,
-			'L.A. Lakers':14, 'Memphis':15, 'Miami':16, 'Milwaukee':17, 
-			'Minnesota':18, 'New Orleans':19, 'New York': 20, 'Oklahoma': 21,
-			'Oklahoma City': 21,'Seattle':21, 'Orlando':22, 'Philadelphia':23, 
-			'Phoenix':24,'Portland':25, 'Sacramento':26, 'San Antonio':27, 
-			'Toronto':28,'Utah':29, 'Washington':30, 'Baltimore':30,
-			'Atlanta Hawks': 1, 'Boston Celtics':2, 'Brooklyn Nets': 3, 
-			'New Jersey Nets':3, 'Charlotte Hornets':4,'Chicago Bulls':5, 
-			'Cleveland Cavaliers':6, 'Dallas Mavericks':7, 
-			'Denver Nuggets':8, 'Detroit Pistons':9,'Golden State Warrios':10, 
-			'Houston Rockets':11, 'Indiana Pacers':12, 
-			'L.A. Clippers': 13,'L.A. Lakers':14, 'Memphis Grizzlies':15, 'Miami Heat':16, 
-			'Milwaukee Bucks':17, 'Minnesota Timberwolves':18, 'New Orleans Pelicans':19, 
-			'New York Knicks': 20, 'Oklahoma City Thunder': 21,'Orlando Magic':22, 
-			'Philadelphia 76ers':23, 'Phoenix Suns':24,'Portland Trail Blazers':25, 
-			'Sacramento Kings':26, 'San Antonio':27, 'Toronto Raptors':28,
-			'Utah Jazz':29, 'Washington Wizards':30, 'LA Clippers': 13, 'LA Lakers':14}
+team_id = {'Atlanta': 'ATL', 'Boston':'BOS', 'Brooklyn': 'BRK', 'New Jersey':'BRK', 
+			'Chicago':'CHI', 'Cleveland':'CLE', 'Dallas':'DAL', 'Denver':'DEN', 
+			'Golden State':'GSW', 'Houston':'HOU', 'Indiana':'IND', 'L.A. Clippers': 'LAC',
+			'L.A. Lakers':'LAL', 'Memphis':'MEM', 'Miami':'MIA', 'Milwaukee':'MIL', 
+			'Minnesota':'MIN', 'New Orleans':'NOP', 'New York': 'NYK', 'Oklahoma': 'OKC',
+			'Oklahoma City': 'OKC','Seattle':'OKC', 'Orlando':'ORL', 'Philadelphia':'PHI', 
+			'Phoenix':'PHO','Portland':'POR', 'Sacramento':'SAC', 'San Antonio':'SAS', 
+			'Toronto':'TOR','Utah':'UTA', 'Washington':'WAS', 'Baltimore':'WAS',
+			'Atlanta Hawks': 'ATL', 'Boston Celtics':'BOS', 'Brooklyn Nets': 'BRK', 
+			'New Jersey Nets':'BRK', 'Charlotte Hornets':'CHO','Chicago Bulls':'CHI', 
+			'Cleveland Cavaliers':'CLE', 'Dallas Mavericks':'DAL', 
+			'Denver Nuggets':'DEN', 'Detroit Pistons':'DET','Golden State Warriors':'GSW', 
+			'Houston Rockets':'HOU', 'Indiana Pacers':'IND', 
+			'L.A. Clippers': 'LAC','L.A. Lakers':'LAL', 'Memphis Grizzlies':'MEM', 
+			'Miami Heat':'MIA', 'New Orleans Pelicans':'NOP', 
+			'Milwaukee Bucks':'MIL', 'Minnesota Timberwolves':'MIN', 'Detroit':'DET',
+			'New York Knicks': 'NYK', 'Oklahoma City Thunder': 'OKC','Orlando Magic':'ORL', 
+			'Philadelphia 76ers':'PHI', 'Phoenix Suns':'PHO','Portland Trail Blazers':'POR', 
+			'Sacramento Kings':'SAC', 'San Antonio':'SAS', 'Toronto Raptors':'TOR',
+			'Utah Jazz':'UTA', 'Washington Wizards':'WAS', 'LA Clippers': 'LAC', 
+			'LA Lakers':'LAL'}
 
 bet_type_id = {'ml':1, 'ps':2, 'total':3}
+
+correct_team_id = {'PHX': 'PHO', 'BKN':'BRK', 'NOH': 'NOP', 'NJN':'BRK', 'CHA': 'CHO'}
+
 
 def get_team_id(team):
 	return team_id[team]
@@ -45,15 +50,17 @@ def get_away(team):
 	return team_id[team.split('@')[0]]
 
 def get_odds(season, start_date, end_date, market_id):
-	csv = f'odds/{season}_{market_id}.csv'
-	if not os.path.isdir('odds'):
-		os.makedirs('odds')
+	csv = f'csv/odds/{season}_{market_id}.csv'
+	if not os.path.isdir('csv/odds'):
+		os.makedirs('csv/odds')
 	if os.path.isfile(csv):
 		return
 	nba = NBA()
 	nba_market_ids= nba.market_ids(market_id)
 	sb = Sportsbook()
-	sb_ids = sb.ids(['pinnacle', 'bet365'])
+	sb_ids = sb.ids(['pinnacle', 'bodog', '5dimes', 'sports interaction', 
+					 'bet365','bovada','mybookie'])
+
 	days = (end_date - start_date).days
 	weeks = days // 31 + 2
 	lines_dataframes = []
@@ -73,12 +80,11 @@ def get_odds(season, start_date, end_date, market_id):
 	if not combined.empty:
 		combined = combined.loc[combined['participant score'].notnull(),:]
 		combined = combined.loc[combined['participant'].notnull(),:]
-		combined.rename(columns={'participant': 'team_abbr', 'datetime':'date',
+		combined.rename(columns={'participant': 'team_abbr',
 								'decimal odds':'decimal_odds', 'spread / total': 'spread',
 								'american odds':'vegas_odds'}, 
 								inplace=True)
-		combined['date'] = pd.to_datetime(combined["date"])
-		combined['date'] = combined['date'].map(lambda x: x.date())
+		combined['datetime'] = pd.to_datetime(combined["datetime"])
 
 		combined['home_team'] = combined['event'].map(lambda x: x.split('@')[1])
 		combined['away_team'] = combined['event'].map(lambda x: x.split('@')[0])
@@ -88,19 +94,20 @@ def get_odds(season, start_date, end_date, market_id):
 
 		combined = combined.loc[combined['home_team_exists'] & combined['away_team_exists']]
 
-		combined['home_id'] = combined['home_team'].map(get_team_id)
-		combined['away_id'] = combined['away_team'].map(get_team_id)
-
-		combined['home_id'] = combined['event'].map(get_home)
-		combined['away_id'] = combined['event'].map(get_away)
+		combined['home_abbr'] = combined['home_team'].map(get_team_id)
+		combined['away_abbr'] = combined['away_team'].map(get_team_id)
 		
 		combined['bet_type_id'] = bet_type_id[market_id]
+		combined['team_abbr'] = combined['team_abbr'].map(lambda x: 
+				correct_team_id[x] if x in correct_team_id else x)
+
 
 		drop_columns = ['market id','event id', 'participant score', 'market','event', 
 						'participant id', 'profit', 'result','home_team', 'away_team', 
 						'sportsbook id', 'participant full name', 'home_team_exists',
-						'away_team_exists']
-		combined.drop(columns=drop_columns, axis=1, inplace=True)
+						'away_team_exists', 'sportsbook alias']
+
+		combined.drop([x for x in drop_columns if x in combined.columns], axis=1, inplace=True)
 		combined.to_csv(csv,mode='w+', index=False, header=True)
 
 
@@ -120,8 +127,8 @@ def save_odds():
 	for season, start_date, end_date in tqdm(cur.fetchall(), colour='cyan', position=1):
 		if season < 2007:
 			continue
-		get_odds(season, start_date, end_date, 'ps')
 		get_odds(season, start_date, end_date, 'ml')
+		get_odds(season, start_date, end_date, 'ps')
 		get_odds(season, start_date, end_date, 'total')
 
 	conn.close()
@@ -137,16 +144,22 @@ def insert_odds():
 		sif.insert_bet_type('db_src/bet_type.csv', cur)
 		conn.commit()
 	db_func.truncate_imports(cur)
-	csvs = [f'odds/{f}' for f in listdir('odds') if isfile(join('odds', f))]
-	for csv in tqdm(csvs, colour='magenta', position=1):
+	csvs = [f'csv/odds/{f}' for f in listdir('csv/odds') if isfile(join('csv/odds', f))]
+	for csv in tqdm(csvs, colour='red', position=1):
 		sif.insert_to_imports(csv)
+	conn.commit()
 
+	sif.imports_to_bets(cur)
+	sif.imports_to_bets_total(cur)
+	
+	conn.commit()
 	conn.close()
 
 
 def main():
 	save_odds()
 	insert_odds()
-	
+
+
 if __name__ == '__main__':
 	main()

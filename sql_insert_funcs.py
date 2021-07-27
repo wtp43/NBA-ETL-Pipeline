@@ -65,16 +65,11 @@ def imports_to_bets(cur):
 
 				AND (im.bet_type_id = 1 OR im.bet_type_id = 2)
 				AND NOT EXISTS (
-					SELECT * FROM odds AS o, imports AS im, match AS m
+					SELECT * FROM odds AS o
 					WHERE m.match_id = o.match_id
-					AND im.datetime >= m.date - INTERVAL '1 DAY' 
-					AND im.datetime <= m.date + INTERVAL '2 DAY'
 					AND im.team_abbr = o.team_abbr
-					AND im.home_abbr = m.home_abbr 
-					AND im.away_abbr = m.away_abbr
 					AND im.sportsbook = o.sportsbook
 					AND im.bet_type_id = o.bet_type_id
-					AND im.team_abbr = o.team_abbr
 					AND im.datetime = o.datetime 
 				);'''
 		
@@ -82,7 +77,7 @@ def imports_to_bets(cur):
 	except Error as err:
 		raise err
 
-		
+
 def imports_to_bets_total(cur):
 	try:
 		query = \
@@ -108,17 +103,11 @@ def imports_to_bets_total(cur):
 
 				AND im.bet_type_id = 3
 				AND NOT EXISTS (
-					SELECT * FROM odds AS o, imports AS im, match AS m
+					SELECT * FROM odds AS o
 					WHERE m.match_id = o.match_id
-					AND im.datetime >= m.date - INTERVAL '1 DAY'
-					AND im.datetime <= m.date + INTERVAL '2 DAY'
-					AND (im.team_abbr = 'over' OR im.team_abbr = 'under')
 					AND im.team_abbr = o.team_abbr
-					AND im.home_abbr = m.home_abbr 
-					AND im.away_abbr = m.away_abbr
 					AND im.sportsbook = o.sportsbook
 					AND im.bet_type_id = o.bet_type_id
-					AND im.bet_type_id = 3
 					AND im.datetime = o.datetime );'''
 		
 		cur.execute(query)
@@ -160,8 +149,7 @@ def imports_to_player_performance(cur):
 					OR im.team_abbr = m.away_abbr)
 			AND NOT EXISTS
 				(SELECT *
-					FROM imports AS im, 
-						player AS p, player_performance AS pp
+					FROM player_performance AS pp
 					WHERE (im.team_abbr = m.home_abbr
 							OR im.team_abbr = m.away_abbr)
 						AND im.date = m.date
@@ -184,7 +172,7 @@ def imports_to_team(cur):
 			FROM imports as im
 			WHERE NOT EXISTS
 				(SELECT *
-					FROM team AS t, imports AS im
+					FROM team AS t
 					WHERE t.team_abbr = im.team_abbr
 					);'''
 		cur.execute(query)
@@ -203,7 +191,7 @@ def imports_to_match(cur):
 			FROM imports as im
 			WHERE NOT EXISTS
 				(SELECT *
-					FROM match AS m, imports AS im
+					FROM match AS m
 					WHERE m.date = im.date
 						AND m.away_abbr = im.away_abbr
 						AND m.home_abbr = im.home_abbr);'''
@@ -221,7 +209,7 @@ def imports_to_player(cur):
 			FROM imports AS im
 			WHERE NOT EXISTS
 				(SELECT *
-					FROM player AS p, imports AS im
+					FROM player AS p
 					WHERE p.bbref_endpoint = im.bbref_endpoint);'''
 		cur.execute(query)
 	except Error as err:
@@ -246,8 +234,7 @@ def imports_to_player_team(cur):
 			FROM imports AS im, player AS p, team AS t
 			WHERE NOT EXISTS
 				(SELECT *
-					FROM player_team AS pt, imports AS im,
-						player AS p
+					FROM player_team AS pt
 					WHERE p.player_id = pt.player_id
 					AND im.bbref_endpoint = p.bbref_endpoint
 					AND im.team_abbr = pt.team_abbr

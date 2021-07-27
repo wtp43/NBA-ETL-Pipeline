@@ -1,0 +1,18 @@
+-- Check imports vs odds
+
+SELECT im.datetime, im.spread, im.decimal_odds, im.vegas_odds, im.team_abbr, im.bet_type_id, im.home_abbr, im.away_abbr, im.sportsbook
+from imports as im where not exists
+(SELECT * from odds as o 
+ where im.datetime = o.datetime
+and im.team_abbr = o.team_abbr
+and im.bet_type_id = o.bet_type_id
+and im.vegas_odds = o.vegas_odds
+and im.decimal_odds = o.decimal_odds
+and im.sportsbook = o.sportsbook)
+order by im.datetime asc
+
+-- get match_ids of missing odds
+select * from match as m
+where not exists(select * from odds as o where
+				o.match_id = m.match_id)
+order by m.date asc

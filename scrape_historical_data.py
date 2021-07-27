@@ -126,8 +126,8 @@ def save_html(url, file):
     :return: None
     """
 	if os.path.isfile(file) and os.stat(file).st_size !=0:
-		logging.info(file +": has already been scraped before")
-		return
+		#logging.info(file +": has already been scraped before")
+		return False
 	try:
 		exception = True
 		while(exception):
@@ -143,6 +143,7 @@ def save_html(url, file):
 		os.makedirs(os.path.dirname(file), exist_ok=True)
 		with open(file, "w", encoding='utf-8') as f:
 			f.write(str(soup))
+		return True
 	except Exception as err:
 		print(err)
 
@@ -176,10 +177,10 @@ def match_list_to_csv(match_list_html):
 		match_urls.extend(weird_match_urls)
 
 		season = re.findall('[0-9]{4}', match_list_html)[0]
-		directory = "csv/" + season + '/'
+		directory = "csv/match_lists"
 		if not os.path.isdir(directory):
 			os.makedirs(directory)
-		file_path = directory+"/match_list.csv"
+		file_path = directory+"/"+season+'_match_list.csv'
 		if os.path.exists(file_path):
 			os.remove(file_path)
 
