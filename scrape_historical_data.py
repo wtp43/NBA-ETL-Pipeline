@@ -165,8 +165,16 @@ def match_list_to_csv(match_list_html):
 
 		match_urls = soup.find_all(\
 			href=re.compile(r'\/leagues\/NBA_[0-9]{4}_games-[A-Za-z]{1,}.html'))
+		weird_match_urls = soup.find_all(\
+			href=re.compile(r'\/leagues\/NBA_[0-9]{4}_games-[A-Za-z]{1,}-[0-9]{4}.html'))
+
 		match_urls = [re.findall(r'\/leagues\/NBA_[0-9]{4}_games-[A-Za-z]{1,}.html',\
 			 str(match_urls[i]))[0] for i in range(len(match_urls))]
+		weird_match_urls = [re.findall(r'\/leagues\/NBA_[0-9]{4}_games-[A-Za-z]{1,}-[0-9]{4}.html',\
+			 str(weird_match_urls[i]))[0] for i in range(len(weird_match_urls))]
+
+		match_urls.extend(weird_match_urls)
+
 		season = re.findall('[0-9]{4}', match_list_html)[0]
 		directory = "csv/" + season + '/'
 		if not os.path.isdir(directory):
