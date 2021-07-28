@@ -12,6 +12,7 @@ from os import listdir
 from os.path import isfile, join
 from tqdm import tqdm
 import sql_insert_funcs as sif
+import re
 
 team_id = {'Atlanta': 'ATL', 'Boston':'BOS', 'Brooklyn': 'BRK', 'New Jersey':'BRK', 
 			'Chicago':'CHI', 'Cleveland':'CLE', 'Dallas':'DAL', 'Denver':'DEN', 
@@ -155,11 +156,52 @@ def insert_odds():
 	conn.commit()
 	conn.close()
 
+#Sportsbookreview is missing odds for certain matches (OKC-Seattle Supersonics and others)
+#They will be filled in using moneyline odds data from sportsbookreviewonline.com
+def fill_missing_odds():
+	conn = db_func.get_conn()
+	conn.autocommit = True
+	cur = conn.cursor()
+	db_func.truncate_imports(cur)
+	csvs = [f'csv/sbro_odds/{f}' for f in listdir('csv/sbro_odds') 
+				if isfile(join('csv/sbro_odds', f))]
+	for csv in tqdm(csvs, colour='red', position=1):
+		modify_sbro_odds(csv)
+	conn.commit()
+
+	sif.imports_to_bets(cur)
+	
+	conn.commit()
+	conn.close()
+
+def modify_sbro_odds(csv):
+	df = pd.read_csv(csv)
+	season = int('20'+re.findall(r'-[0-9]{2}').lstrip('-')[0])
+	if season != 2020:
+		df['date'] = df['date'] + str(season) if len(df['date']) == 3 else \
+					df['date'] + str(season-1)
+	else:
+		df['date'] = df['date'] + str(season) if df['rot']<= 536 else \
+						df['date'] + str(season-1)
+	df['date'] = df['date'].map(sbro_dates_to_date)
+	df.rename(columns={'Date': 'date', 'ML':'vegas_odds'}, inplace=True)
+	basic_df.drop(['MP', 'Starters'], axis=1, inplace=True)
+
+
+def sbro_dates_to_date(date):
+	date = str(date)
+	year = date[-4:]
+	day = date[-6:-4]
+	if len(date) == 8:
+		month = date[0:2]
+	else:
+		month = date[0:1]
+	return datetime(int(year),int(month),int(day)).date()
 
 def main():
-	save_odds()
-	insert_odds()
-
+	#save_odds()
+	#insert_odds()
+	print(sbro_dates_to_date(12012008))
 
 if __name__ == '__main__':
 	main()
