@@ -41,6 +41,29 @@ def insert_bet_type(csv, cur):
 		headers = headers.lstrip().rstrip().split(',')
 		cur.copy_from(f, 'bet_type', columns=headers,sep=',')
 
+def fill_missing_odds(cur):
+	try:
+		query = \
+		'''INSERT INTO odds
+			(datetime, match_id, vegas_odds, sportsbook, team_abbr, bet_type_id,
+				decimal_odds)
+			SELECT im.datetime, m.match_id, im.vegas_odds, im.sportsbook, 
+				im.team_abbr, im.bet_type_id, im.decimal_odds
+			FROM imports AS im, match AS m, team as t1, team as t2
+			WHERE  im.datetime >= m.date - INTERVAL '2 DAY'
+				AND im.datetime <= m.date + INTERVAL '2 DAY'
+				AND im.team_abbr = t1.team_abbr
+				AND t1.team_id = t2.team_id
+				AND (t2.team_abbr = m.home_abbr OR 
+					t2.team_abbr = m.away_abbr)
+				AND (im.bet_type_id = 1)
+				AND NOT EXISTS (
+					SELECT * FROM odds AS o
+					WHERE m.match_id = o.match_id
+				);'''
+		cur.execute(query)
+	except Error as err:
+		raise err
 
 def imports_to_bets(cur):
 	try:

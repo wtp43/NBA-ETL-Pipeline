@@ -34,12 +34,16 @@ team_id = {'Atlanta': 'ATL', 'Boston':'BOS', 'Brooklyn': 'BRK', 'New Jersey':'BR
 			'Philadelphia 76ers':'PHI', 'Phoenix Suns':'PHO','Portland Trail Blazers':'POR', 
 			'Sacramento Kings':'SAC', 'San Antonio':'SAS', 'Toronto Raptors':'TOR',
 			'Utah Jazz':'UTA', 'Washington Wizards':'WAS', 'LA Clippers': 'LAC', 
-			'LA Lakers':'LAL'}
+			'LA Lakers':'LAL', 'Charlotte': 'CHO', 'NewYork':'NYK', 'SanAntonio':'SAS',
+			'OklahomaCity':'OKC', 'LALakers': 'LAL', 'LAClippers':'LAC', 'NewOrleans':'NOP',
+			'NewJersey':'BRK', 'GoldenState':'GSW'}
+
 
 bet_type_id = {'ml':1, 'ps':2, 'total':3}
 
 correct_team_id = {'PHX': 'PHO', 'BKN':'BRK', 'NOH': 'NOP', 'NJN':'BRK', 'CHA': 'CHO'}
 
+bet_dict = {'PK':100, 'NL':-110}
 
 def get_team_id(team):
 	return team_id[team]
@@ -60,7 +64,7 @@ def get_odds(season, start_date, end_date, market_id):
 	nba_market_ids= nba.market_ids(market_id)
 	sb = Sportsbook()
 	sb_ids = sb.ids(['pinnacle', 'bodog', '5dimes', 'sports interaction', 
-					 'bet365','bovada','mybookie'])
+					 'bet365','bovada','mybookie', 'gtbets', 'intertops', 'wagerweb'])
 
 	days = (end_date - start_date).days
 	weeks = days // 31 + 2
@@ -102,7 +106,7 @@ def get_odds(season, start_date, end_date, market_id):
 		combined['team_abbr'] = combined['team_abbr'].map(lambda x: 
 				correct_team_id[x] if x in correct_team_id else x)
 
-
+		combined['decimal_odds'] = combined['vegas_odds'].map(vegas_to_decimal)
 		drop_columns = ['market id','event id', 'participant score', 'market','event', 
 						'participant id', 'profit', 'result','home_team', 'away_team', 
 						'sportsbook id', 'participant full name', 'home_team_exists',
@@ -163,32 +167,52 @@ def fill_missing_odds():
 	conn.autocommit = True
 	cur = conn.cursor()
 	db_func.truncate_imports(cur)
+
+	if not os.path.isdir('csv/sbro_odds/modified'):
+		os.makedirs('csv/sbro_odds/modified')
+
 	csvs = [f'csv/sbro_odds/{f}' for f in listdir('csv/sbro_odds') 
 				if isfile(join('csv/sbro_odds', f))]
 	for csv in tqdm(csvs, colour='red', position=1):
+		print(csv)
 		modify_sbro_odds(csv)
+	modified_csvs = [f'csv/sbro_odds/modified/{f}' for f in listdir('csv/sbro_odds/modified') 
+				if isfile(join('csv/sbro_odds/modified', f))]
+	for csv in tqdm(modified_csvs, colour='red', position=1):
+		print(csv)
+		sif.insert_to_imports(csv)
 	conn.commit()
-
-	sif.imports_to_bets(cur)
+	sif.fill_missing_odds(cur)
 	
 	conn.commit()
 	conn.close()
 
 def modify_sbro_odds(csv):
 	df = pd.read_csv(csv)
-	season = int('20'+re.findall(r'-[0-9]{2}').lstrip('-')[0])
+	season = int('20'+re.findall(r'-[0-9]{2}', csv)[0].lstrip('-'))
+	df.rename(columns={'Date': 'datetime', 'ML':'vegas_odds',
+					'Team':'team_abbr'}, inplace=True)
+					
 	if season != 2020:
-		df['date'] = df['date'] + str(season) if len(df['date']) == 3 else \
-					df['date'] + str(season-1)
+		df['datetime'] = df['datetime'].map(lambda x: str(x) + str(season) if len(str(x)) == 3 else \
+					str(x) + str(season-1))
 	else:
-		df['date'] = df['date'] + str(season) if df['rot']<= 536 else \
-						df['date'] + str(season-1)
-	df['date'] = df['date'].map(sbro_dates_to_date)
-	df.rename(columns={'Date': 'date', 'ML':'vegas_odds'}, inplace=True)
-	basic_df.drop(['MP', 'Starters'], axis=1, inplace=True)
+		df['datetime'] = df.apply(lambda x: str(x['datetime'])+ str(season) if x['datetime']<= 1022 else \
+						str(x['datetime']) + str(season-1), axis=1)
 
+	df['datetime'] = df['datetime'].map(sbro_dates_to_date)
+	df['team_abbr'] = df['team_abbr'].map(lambda x: team_id[x])
+	df['sportsbook'] = 'sbro'
+	df['bet_type_id'] = 1
+	df['vegas_odds'] = df['vegas_odds'].map(lambda x: bet_dict[x] if x in bet_dict else x)
+	df['decimal_odds'] = df['vegas_odds'].map(vegas_to_decimal)
+
+	df = df[['datetime','team_abbr', 'vegas_odds', 'sportsbook', 
+			'bet_type_id', 'decimal_odds']]
+	df.to_csv(f'csv/sbro_odds/modified/{season}_sbro_odds.csv', mode='w+',index=False, header=True)
 
 def sbro_dates_to_date(date):
+	print(date)
 	date = str(date)
 	year = date[-4:]
 	day = date[-6:-4]
@@ -196,12 +220,20 @@ def sbro_dates_to_date(date):
 		month = date[0:2]
 	else:
 		month = date[0:1]
-	return datetime(int(year),int(month),int(day)).date()
+	return datetime(int(year),int(month),int(day))
+
+def vegas_to_decimal(vegas_odds):
+	vegas_odds = int(vegas_odds)
+	if vegas_odds > 0:
+		return (vegas_odds/100)+1
+	else:
+		return 1-(100/(-1*vegas_odds))
+
 
 def main():
-	#save_odds()
-	#insert_odds()
-	print(sbro_dates_to_date(12012008))
+	save_odds()
+	insert_odds()
+	fill_missing_odds()
 
 if __name__ == '__main__':
 	main()
