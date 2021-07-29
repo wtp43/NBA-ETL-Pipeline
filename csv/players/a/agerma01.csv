@@ -1,0 +1,6 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2007,22.0,DAL,NBA,SG,32,1,6.7,0.7,2.2,.314,0.2,0.5,.333,0.5,1.7,.309,.350,0.6,1.0,.606,0.0,0.6,0.7,0.2,0.1,0.1,0.5,0.8,2.2,/players/a/agerma01.html,Maurice Ager
+2008,23.0,DAL,NBA,SG,12,3,6.4,0.4,2.3,.185,0.0,0.7,.000,0.4,1.6,.263,.185,0.4,0.5,.833,0.1,0.3,0.3,0.3,0.0,0.1,0.3,0.9,1.3,/players/a/agerma01.html,Maurice Ager
+2008,23.0,NJN,NBA,SG,14,0,6.3,1.1,2.7,.421,0.2,0.8,.273,0.9,1.9,.481,.461,0.1,0.4,.167,0.2,0.4,0.6,0.3,0.0,0.0,0.2,0.4,2.6,/players/a/agerma01.html,Maurice Ager
+2009,24.0,NJN,NBA,SG,20,0,4.9,0.8,2.2,.349,0.0,0.3,.000,0.8,1.9,.405,.349,0.2,0.4,.500,0.2,0.4,0.5,0.2,0.1,0.1,0.2,0.9,1.7,/players/a/agerma01.html,Maurice Ager
+2011,26.0,MIN,NBA,SG,4,0,7.3,1.5,2.8,.545,0.8,1.0,.750,0.8,1.8,.429,.682,0.0,0.0,0,0.0,0.5,0.5,0.3,0.3,0.0,1.0,1.0,3.8,/players/a/agerma01.html,Maurice Ager

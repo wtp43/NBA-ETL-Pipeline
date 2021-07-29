@@ -1,0 +1,4 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2019,19.0,DAL,NBA,SG,72,72,32.2,7.0,16.5,0.42700000000000005,2.3,7.1,0.327,4.7,9.3,0.503,0.49700000000000005,4.8,6.7,0.713,1.2,6.6,7.8,6.0,1.1,0.3,3.4,1.9,21.2,/players/d/doncilu01.html,Luka Dončić
+2020,20.0,DAL,NBA,PG,61,61,33.6,9.5,20.6,0.46299999999999997,2.8,8.9,0.316,6.7,11.7,0.574,0.531,7.0,9.2,0.758,1.3,8.1,9.4,8.8,1.0,0.2,4.3,2.5,28.8,/players/d/doncilu01.html,Luka Dončić
+2021,21.0,DAL,NBA,PG,66,66,34.3,9.8,20.5,0.479,2.9,8.3,0.35,6.9,12.2,0.5670000000000001,0.55,5.2,7.1,0.73,0.8,7.2,8.0,8.6,1.0,0.5,4.3,2.3,27.7,/players/d/doncilu01.html,Luka Dončić

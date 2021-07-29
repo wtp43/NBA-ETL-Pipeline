@@ -1,0 +1,5 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2016,22.0,BOS,NBA,SG,36.0,0.0,8.8,1.0,2.7,0.36700000000000005,0.5,1.8,0.302,0.5,1.0,0.486,0.46399999999999997,0.2,0.2,0.857,0.1,1.0,1.0,0.4,0.4,0.1,0.3,0.8,2.7,/players/h/hunterj01.html,R.J. Hunter
+2017,23.0,CHI,NBA,SG,3.0,0.0,3.0,0.0,0.3,0.0,0.0,0.3,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.3,0.3,0.0,0.0,0.0,0.0,0.0,0.0,/players/h/hunterj01.html,R.J. Hunter
+2018,24.0,HOU,NBA,SG,5.0,1.0,9.0,1.4,4.0,0.35,0.6,2.8,0.214,0.8,1.2,0.667,0.425,0.4,0.4,1.0,0.0,1.0,1.0,0.6,0.6,0.0,0.4,1.4,3.8,/players/h/hunterj01.html,R.J. Hunter
+2019,25.0,BOS,NBA,SG,1.0,0.0,26.0,6.0,13.0,0.462,4.0,10.0,0.4,2.0,3.0,0.667,0.615,1.0,2.0,0.5,1.0,2.0,3.0,3.0,1.0,0.0,0.0,3.0,17.0,/players/h/hunterj01.html,R.J. Hunter

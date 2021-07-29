@@ -1,0 +1,4 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2018,27.0,PHO,NBA,PG,32.0,10.0,20.9,3.8,9.8,0.38799999999999996,0.8,3.0,0.268,3.0,6.7,0.442,0.429,2.0,2.6,0.762,0.4,2.4,2.8,3.8,0.8,0.2,1.5,1.4,10.4,/players/j/jamesmi02.html,Mike James
+2018,27.0,NOP,NBA,PG,4.0,0.0,4.5,0.5,2.3,0.222,0.0,0.3,0.0,0.5,2.0,0.25,0.222,0.0,0.0,0.0,0.3,0.0,0.3,1.5,0.3,0.0,0.3,0.8,1.0,/players/j/jamesmi02.html,Mike James
+2021,30.0,BRK,NBA,PG,13.0,1.0,18.2,2.6,7.1,0.37,0.8,2.4,0.355,1.8,4.7,0.377,0.429,1.6,2.1,0.778,0.2,2.2,2.5,4.2,0.5,0.1,1.5,0.8,7.7,/players/j/jamesmi02.html,Mike James

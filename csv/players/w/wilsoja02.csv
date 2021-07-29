@@ -1,0 +1,2 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2018,27.0,LAC,NBA,SF,15,10,18.3,2.5,5.4,0.469,1.8,4.2,0.429,0.7,1.2,0.611,0.636,0.1,0.3,0.5,0.2,1.9,2.1,0.7,0.3,0.5,0.5,2.3,7.0,/players/w/wilsoja02.html,Jamil Wilson

@@ -1,0 +1,7 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2013,22.0,HOU,NBA,PF,44,14,12.2,2.2,4.8,.455,0.5,1.9,.289,1.7,3.0,.562,.512,0.7,1.2,.627,0.8,1.3,2.1,0.7,0.2,0.2,0.8,1.7,5.7,/players/m/motiedo01.html,Donatas Motiejūnas
+2014,23.0,HOU,NBA,PF,62,3,15.4,2.1,4.8,.443,0.3,1.4,.250,1.8,3.4,.519,.478,0.9,1.5,.604,1.0,2.7,3.6,0.5,0.3,0.3,0.8,2.1,5.5,/players/m/motiedo01.html,Donatas Motiejūnas
+2015,24.0,HOU,NBA,PF,71,62,28.7,5.0,9.9,.504,0.7,1.9,.368,4.3,8.0,.536,.539,1.4,2.3,.602,1.9,4.0,5.9,1.8,0.8,0.5,1.7,2.9,12.0,/players/m/motiedo01.html,Donatas Motiejūnas
+2016,25.0,HOU,NBA,PF,37,22,14.8,2.4,5.5,.439,0.4,1.5,.281,2.0,4.0,.500,.478,0.9,1.4,.642,1.0,1.9,2.9,1.1,0.5,0.1,1.2,1.9,6.2,/players/m/motiedo01.html,Donatas Motiejūnas
+2017,26.0,NOP,NBA,PF,34,0,14.1,1.7,4.1,.413,0.3,1.4,.234,1.4,2.7,.505,.453,0.7,1.4,.510,0.8,2.2,3.0,0.9,0.5,0.3,0.9,1.6,4.4,/players/m/motiedo01.html,Donatas Motiejūnas
+2019,28.0,SAS,NBA,PF,3,0,4.3,1.0,2.0,.500,0.0,0.0,0,1.0,2.0,.500,.500,0.0,0.7,.000,0.7,0.3,1.0,0.3,0.0,0.3,1.0,2.0,2.0,/players/m/motiedo01.html,Donatas Motiejūnas

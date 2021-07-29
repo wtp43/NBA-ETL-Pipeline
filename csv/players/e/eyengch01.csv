@@ -1,0 +1,4 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2011,21.0,CLE,NBA,SF,44.0,18.0,21.5,3.0,7.0,0.425,0.6,2.1,0.275,2.4,4.9,0.488,0.466,0.4,0.6,0.643,0.6,2.2,2.8,0.8,0.8,0.6,1.1,1.8,6.9,/players/e/eyengch01.html,Christian Eyenga
+2012,22.0,CLE,NBA,SF,6.0,0.0,13.8,0.5,3.2,0.158,0.2,0.3,0.5,0.3,2.8,0.11800000000000001,0.184,0.3,1.0,0.33299999999999996,0.5,1.5,2.0,0.7,0.5,0.7,0.3,1.2,1.5,/players/e/eyengch01.html,Christian Eyenga
+2012,22.0,LAL,NBA,SF,1.0,0.0,19.0,3.0,6.0,0.5,0.0,1.0,0.0,3.0,5.0,0.6,0.5,2.0,2.0,1.0,1.0,1.0,2.0,1.0,0.0,1.0,1.0,0.0,8.0,/players/e/eyengch01.html,Christian Eyenga

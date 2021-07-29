@@ -1,0 +1,5 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2003,27.0,TOR,NBA,PF,16,0,6.6,0.9,1.6,.600,0.0,0.0,0,0.9,1.6,.600,.600,0.6,0.8,.833,0.3,1.2,1.4,0.0,0.3,0.7,0.4,1.0,2.5,/players/b/bastoma01.html,Maceo Baston
+2007,31.0,IND,NBA,PF,47,2,8.6,1.0,1.6,.645,0.1,0.1,.429,1.0,1.5,.667,.664,0.8,1.0,.787,0.4,1.1,1.6,0.3,0.3,0.4,0.7,1.4,2.9,/players/b/bastoma01.html,Maceo Baston
+2008,32.0,TOR,NBA,PF,15,2,6.9,1.1,1.7,.680,0.0,0.0,0,1.1,1.7,.680,.680,0.5,0.7,.700,0.6,1.1,1.7,0.2,0.1,0.3,0.3,1.3,2.7,/players/b/bastoma01.html,Maceo Baston
+2009,33.0,IND,NBA,PF,27,0,8.0,0.9,1.7,.543,0.0,0.0,.000,0.9,1.7,.556,.543,0.6,1.0,.630,0.8,1.1,1.9,0.3,0.2,0.4,0.4,1.4,2.5,/players/b/bastoma01.html,Maceo Baston

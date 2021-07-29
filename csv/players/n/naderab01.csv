@@ -1,0 +1,5 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2018,24.0,BOS,NBA,SF,48.0,1.0,10.9,1.0,3.1,0.336,0.5,1.4,0.354,0.6,1.8,0.321,0.413,0.5,0.8,0.59,0.3,1.2,1.5,0.5,0.3,0.2,0.7,0.9,3.0,/players/n/naderab01.html,Abdel Nader
+2019,25.0,OKC,NBA,SF,61.0,1.0,11.4,1.5,3.5,0.423,0.5,1.6,0.32,1.0,1.9,0.513,0.498,0.4,0.6,0.75,0.2,1.7,1.9,0.3,0.3,0.2,0.4,1.1,4.0,/players/n/naderab01.html,Abdel Nader
+2020,26.0,OKC,NBA,SF,55.0,6.0,15.8,2.2,4.8,0.46799999999999997,0.9,2.3,0.375,1.4,2.5,0.556,0.5589999999999999,0.9,1.2,0.773,0.3,1.6,1.8,0.7,0.4,0.4,0.8,1.4,6.3,/players/n/naderab01.html,Abdel Nader
+2021,27.0,PHO,NBA,SF,24.0,0.0,14.8,2.4,4.8,0.491,0.8,1.8,0.419,1.6,3.0,0.534,0.569,1.2,1.5,0.757,0.3,2.3,2.6,0.8,0.4,0.4,0.8,1.4,6.7,/players/n/naderab01.html,Abdel Nader

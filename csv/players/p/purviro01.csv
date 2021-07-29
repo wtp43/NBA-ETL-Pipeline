@@ -1,0 +1,2 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2018,23.0,ORL,NBA,SG,16,2,18.1,2.2,6.7,0.327,0.8,3.3,0.25,1.4,3.4,0.4,0.38799999999999996,0.8,0.9,0.867,0.1,1.6,1.7,1.1,0.2,0.2,0.6,1.6,6.0,/players/p/purviro01.html,Rodney Purvis

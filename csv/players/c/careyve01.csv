@@ -1,0 +1,2 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2021,19.0,CHO,NBA,C,19,4,6.1,0.9,1.9,0.5,0.1,0.4,0.14300000000000002,0.9,1.5,0.586,0.514,0.5,0.6,0.818,0.3,1.1,1.4,0.1,0.1,0.3,0.3,0.7,2.4,/players/c/careyve01.html,Vernon Carey Jr.

@@ -1,0 +1,5 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2018,23.0,BOS,NBA,PF,73,0,15.8,0.9,2.6,0.34600000000000003,0.5,1.7,0.32,0.3,0.9,0.397,0.452,0.3,0.6,0.61,0.5,1.7,2.2,0.3,0.3,0.1,0.3,1.2,2.7,/players/o/ojelese01.html,Semi Ojeleye
+2019,24.0,BOS,NBA,PF,56,3,10.6,1.2,2.8,0.424,0.5,1.6,0.315,0.7,1.2,0.565,0.513,0.4,0.7,0.615,0.4,1.1,1.5,0.4,0.2,0.1,0.3,0.8,3.3,/players/o/ojelese01.html,Semi Ojeleye
+2020,25.0,BOS,NBA,PF,69,6,14.7,1.2,2.8,0.408,0.7,1.8,0.37799999999999995,0.5,1.0,0.46399999999999997,0.531,0.4,0.5,0.875,0.4,1.7,2.1,0.5,0.3,0.1,0.3,1.2,3.4,/players/o/ojelese01.html,Semi Ojeleye
+2021,26.0,BOS,NBA,PF,56,15,17.0,1.6,3.9,0.40299999999999997,1.0,2.8,0.36700000000000005,0.6,1.1,0.49200000000000005,0.534,0.4,0.6,0.75,0.6,2.1,2.6,0.7,0.3,0.0,0.4,1.0,4.6,/players/o/ojelese01.html,Semi Ojeleye

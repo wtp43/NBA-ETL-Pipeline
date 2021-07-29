@@ -1,0 +1,2 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2019,25.0,CLE,NBA,SF,27,4,16.3,1.7,3.9,0.44299999999999995,0.4,1.4,0.256,1.4,2.5,0.552,0.491,0.4,0.5,0.769,1.0,2.7,3.6,0.5,0.3,0.3,0.4,0.7,4.2,/players/b/blossja01.html,Jaron Blossomgame

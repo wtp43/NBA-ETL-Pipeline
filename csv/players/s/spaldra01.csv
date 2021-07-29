@@ -1,0 +1,4 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2019,21.0,DAL,NBA,PF,1.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,/players/s/spaldra01.html,Ray Spalding
+2019,21.0,PHO,NBA,PF,13.0,3.0,11.3,1.9,3.6,0.532,0.0,0.2,0.0,1.9,3.4,0.568,0.532,0.3,0.9,0.33299999999999996,1.2,2.5,3.7,0.4,0.7,0.6,0.7,1.8,4.2,/players/s/spaldra01.html,Ray Spalding
+2021,23.0,HOU,NBA,C,2.0,0.0,9.5,1.0,2.0,0.5,0.0,0.5,0.0,1.0,1.5,0.667,0.5,0.0,1.0,0.0,1.0,1.0,2.0,0.0,0.0,1.0,1.5,1.5,2.0,/players/s/spaldra01.html,Ray Spalding

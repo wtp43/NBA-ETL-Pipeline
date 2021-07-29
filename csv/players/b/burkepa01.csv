@@ -1,0 +1,4 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2003,29.0,ORL,NBA,C,62,8,12.6,1.8,4.8,.382,0.0,0.1,.143,1.8,4.7,.388,.383,0.6,0.9,.690,0.9,1.4,2.4,0.4,0.3,0.4,0.8,1.6,4.3,/players/b/burkepa01.html,Pat Burke
+2006,32.0,PHO,NBA,C,42,0,8.2,1.5,3.0,.496,0.0,0.2,.286,1.5,2.9,.508,.504,0.3,0.5,.619,0.5,1.2,1.7,0.4,0.1,0.3,0.8,1.5,3.4,/players/b/burkepa01.html,Pat Burke
+2007,33.0,PHO,NBA,C,23,0,7.1,1.0,2.8,.354,0.3,1.0,.273,0.7,1.9,.395,.400,0.3,0.6,.615,0.5,1.5,2.0,0.2,0.1,0.1,0.3,0.8,2.6,/players/b/burkepa01.html,Pat Burke

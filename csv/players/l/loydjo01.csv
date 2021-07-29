@@ -1,0 +1,2 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2019,25.0,TOR,NBA,PG,12,0,4.6,0.7,1.5,0.444,0.3,0.7,0.5,0.3,0.8,0.4,0.556,0.8,0.9,0.818,0.1,0.7,0.8,0.5,0.0,0.0,0.2,0.4,2.4,/players/l/loydjo01.html,Jordan Loyd

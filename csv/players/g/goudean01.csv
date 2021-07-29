@@ -1,0 +1,4 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2012,23.0,LAL,NBA,SG,40,0,10.5,1.7,4.4,.391,0.7,1.9,.373,1.0,2.5,.404,.471,0.3,0.3,.917,0.1,0.7,0.8,0.5,0.1,0.0,0.5,0.8,4.4,/players/g/goudean01.html,Andrew Goudelock
+2013,24.0,LAL,NBA,SG,1,0,6.0,0.0,2.0,.000,0.0,0.0,0,0.0,2.0,.000,.000,0.0,0.0,0,1.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,/players/g/goudean01.html,Andrew Goudelock
+2016,27.0,HOU,NBA,PG,8,0,6.3,1.1,2.5,.450,0.1,1.1,.111,1.0,1.4,.727,.475,0.4,0.5,.750,0.1,0.1,0.3,0.5,0.8,0.3,0.9,0.5,2.8,/players/g/goudean01.html,Andrew Goudelock

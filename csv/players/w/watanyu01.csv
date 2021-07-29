@@ -1,0 +1,4 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2019,24.0,MEM,NBA,SF,15.0,0.0,11.6,1.0,3.4,0.294,0.1,1.1,0.125,0.9,2.3,0.371,0.314,0.5,0.7,0.7,0.3,1.8,2.1,0.5,0.3,0.1,0.4,0.7,2.6,/players/w/watanyu01.html,Yuta Watanabe
+2020,25.0,MEM,NBA,SF,18.0,0.0,5.8,0.8,1.9,0.441,0.2,0.4,0.375,0.7,1.4,0.462,0.485,0.2,0.4,0.375,0.4,0.7,1.1,0.3,0.3,0.1,0.1,0.5,2.0,/players/w/watanyu01.html,Yuta Watanabe
+2021,26.0,TOR,NBA,SF,50.0,4.0,14.5,1.6,3.6,0.439,0.7,1.8,0.4,0.9,1.8,0.478,0.539,0.5,0.6,0.828,0.7,2.5,3.2,0.8,0.5,0.4,0.4,1.1,4.4,/players/w/watanyu01.html,Yuta Watanabe

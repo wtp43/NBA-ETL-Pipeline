@@ -1,0 +1,4 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2020,22.0,DET,NBA,PF,4.0,0.0,12.0,0.3,1.0,0.25,0.0,0.0,0.0,0.3,1.0,0.25,0.25,1.0,1.5,0.667,1.5,2.3,3.8,0.5,0.3,0.3,0.5,2.3,1.5,/players/h/halldo01.html,Donta Hall
+2020,22.0,BRK,NBA,C,5.0,0.0,17.0,2.8,3.6,0.778,0.0,0.0,0.0,2.8,3.6,0.778,0.778,1.0,2.4,0.41700000000000004,1.6,3.0,4.6,0.4,0.4,1.0,0.6,2.8,6.6,/players/h/halldo01.html,Donta Hall
+2021,23.0,ORL,NBA,PF,13.0,0.0,13.8,1.9,2.7,0.7140000000000001,0.0,0.0,0.0,1.9,2.7,0.7140000000000001,0.7140000000000001,1.8,2.6,0.6759999999999999,1.8,2.9,4.8,0.8,0.4,0.8,0.6,1.4,5.6,/players/h/halldo01.html,Donta Hall

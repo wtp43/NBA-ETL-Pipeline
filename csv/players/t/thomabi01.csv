@@ -1,0 +1,5 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2005,29.0,NJN,NBA,SF,25,0,14.2,1.4,3.8,.362,0.7,2.2,.304,0.7,1.5,.447,.452,0.3,0.4,.778,0.3,1.2,1.4,0.7,0.6,0.0,0.4,1.2,3.7,/players/t/thomabi01.html,Billy Thomas
+2006,30.0,WAS,NBA,SG,17,0,7.7,0.8,2.4,.325,0.6,1.8,.333,0.2,0.6,.300,.450,0.1,0.1,1.000,0.3,0.5,0.8,0.5,0.6,0.1,0.4,1.1,2.2,/players/t/thomabi01.html,Billy Thomas
+2008,32.0,NJN,NBA,SF,4,0,2.0,0.0,0.8,.000,0.0,0.8,.000,0.0,0.0,0,.000,0.5,0.5,1.000,0.0,0.0,0.0,0.0,0.0,0.0,0.3,0.0,0.5,/players/t/thomabi01.html,Billy Thomas
+2008,32.0,CLE,NBA,SF,7,0,4.9,0.6,2.0,.286,0.6,1.9,.308,0.0,0.1,.000,.429,0.0,0.0,0,0.0,0.3,0.3,0.0,0.1,0.0,0.4,0.6,1.7,/players/t/thomabi01.html,Billy Thomas

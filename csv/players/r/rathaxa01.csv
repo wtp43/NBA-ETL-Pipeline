@@ -1,0 +1,2 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2018,23.0,MEM,NBA,SG,5,0,23.6,2.4,8.4,0.28600000000000003,0.2,2.8,0.071,2.2,5.6,0.39299999999999996,0.298,0.8,1.8,0.444,0.0,1.0,1.0,3.6,1.2,0.6,2.2,3.6,5.8,/players/r/rathaxa01.html,Xavier Rathan-Mayes
