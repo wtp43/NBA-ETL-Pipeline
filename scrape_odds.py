@@ -154,9 +154,17 @@ def insert_odds():
 		sif.insert_to_imports(csv)
 	conn.commit()
 
+	query = '''ANALYZE imports'''
+	db_func.exec_query(conn, query)
+
 	sif.imports_to_bets(cur)
+	conn.commit()
+	query = '''ANALYZE odds'''
+	db_func.exec_query(conn, query)
+
+
 	sif.imports_to_bets_total(cur)
-	
+
 	conn.commit()
 	conn.close()
 
@@ -174,12 +182,10 @@ def fill_missing_odds():
 	csvs = [f'csv/sbro_odds/{f}' for f in listdir('csv/sbro_odds') 
 				if isfile(join('csv/sbro_odds', f))]
 	for csv in tqdm(csvs, colour='red', position=1):
-		print(csv)
 		modify_sbro_odds(csv)
 	modified_csvs = [f'csv/sbro_odds/modified/{f}' for f in listdir('csv/sbro_odds/modified') 
 				if isfile(join('csv/sbro_odds/modified', f))]
 	for csv in tqdm(modified_csvs, colour='red', position=1):
-		print(csv)
 		sif.insert_to_imports(csv)
 	conn.commit()
 	sif.fill_missing_odds(cur)
@@ -204,7 +210,7 @@ def modify_sbro_odds(csv):
 	df['team_abbr'] = df['team_abbr'].map(lambda x: team_id[x])
 	df['sportsbook'] = 'sbro'
 	df['bet_type_id'] = 1
-	df['vegas_odds'] = df['vegas_odds'].map(lambda x: bet_dict[x] if x in bet_dict else x)
+	df['vegas_odds'] = df['vegas_odds'].map(lambda x: bet_dict[x] if x in bet_dict else int(x))
 	df['decimal_odds'] = df['vegas_odds'].map(vegas_to_decimal)
 
 	df = df[['datetime','team_abbr', 'vegas_odds', 'sportsbook', 
@@ -212,7 +218,6 @@ def modify_sbro_odds(csv):
 	df.to_csv(f'csv/sbro_odds/modified/{season}_sbro_odds.csv', mode='w+',index=False, header=True)
 
 def sbro_dates_to_date(date):
-	print(date)
 	date = str(date)
 	year = date[-4:]
 	day = date[-6:-4]
@@ -223,11 +228,12 @@ def sbro_dates_to_date(date):
 	return datetime(int(year),int(month),int(day))
 
 def vegas_to_decimal(vegas_odds):
-	vegas_odds = int(vegas_odds)
+	vegas_odds =int(vegas_odds)
 	if vegas_odds > 0:
-		return (vegas_odds/100)+1
+		return (vegas_odds+100)/100
 	else:
-		return 1-(100/(-1*vegas_odds))
+		vegas_odds = abs(vegas_odds)
+		return (vegas_odds+100)/vegas_odds
 
 
 def main():
