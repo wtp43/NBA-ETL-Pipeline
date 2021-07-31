@@ -155,7 +155,7 @@ create_player_team_table = \
 		pf				REAL,
 		pts				REAL,
 		PRIMARY KEY(player_id, team_id, season),
-		FOREIGN KEY (player_id) REFERENCES player,
+		FOREIGN KEY(player_id) REFERENCES player,
 		FOREIGN KEY(team_id) REFERENCES team
 		);'''
 
@@ -170,17 +170,16 @@ create_match_table = \
 		playoff_game	REAL		NOT NULL,
 		elevation		REAL		DEFAULT 0,
 		bbref_team		TEXT 		NOT NULL,
-		PRIMARY KEY (match_id),
-		FOREIGN KEY (home_id) REFERENCES team,
-		FOREIGN KEY (away_id) REFERENCES team
-
+		PRIMARY KEY(match_id),
+		FOREIGN KEY(home_id) REFERENCES team,
+		FOREIGN KEY(away_id) REFERENCES team
 		);'''
 
 create_bet_type_table = \
 	'''CREATE TABLE IF NOT EXISTS bet_type(
 		bet_type_id		SERIAL		NOT NULL,
 		bet_type_desc	TEXT 		NOT NULL,
-		PRIMARY KEY (bet_type_id)
+		PRIMARY KEY(bet_type_id)
 		);'''
 
 create_odds_table = \
@@ -195,10 +194,10 @@ create_odds_table = \
 		decimal_odds	REAL						NOT NULL,
 		vegas_odds		REAL						NOT NULL,
 		
-		PRIMARY KEY (match_id, sportsbook, bet_type_id, 
+		PRIMARY KEY(match_id, sportsbook, bet_type_id, 
 					team_id, datetime),
-		FOREIGN KEY (match_id) REFERENCES match,
-		FOREIGN KEY (bet_type_id) REFERENCES bet_type
+		FOREIGN KEY(match_id) REFERENCES match,
+		FOREIGN KEY(bet_type_id) REFERENCES bet_type
 		);'''
 
 create_injury_table = \
@@ -206,9 +205,9 @@ create_injury_table = \
 		player_id		SERIAL		NOT NULL,
 		match_id		SERIAL		NOT NULL,
 		injury			TEXT				,
-		PRIMARY KEY (player_id, match_id),
-		FOREIGN KEY (player_id) REFERENCES player,
-		FOREIGN KEY (match_id) REFERENCES match
+		PRIMARY KEY(match_id, player_id),
+		FOREIGN KEY(player_id) REFERENCES player,
+		FOREIGN KEY(match_id) REFERENCES match
 		);'''
 
 create_player_performance_table = \
@@ -235,7 +234,6 @@ create_player_performance_table = \
 		drtg 			REAL		DEFAULT 0,
 		bpm				REAL		DEFAULT 0,
 		starter 		SMALLINT	DEFAULT 0,
-		date			DATE		NOT NULL,
 		fg				REAL		DEFAULT 0,
 		fga				REAL		DEFAULT 0,
 		fg_pct			REAL		DEFAULT 0,
@@ -255,8 +253,8 @@ create_player_performance_table = \
 		pf				REAL		DEFAULT 0,
 		pts				REAL		DEFAULT 0,
 		pm				REAL		DEFAULT 0,
-		PRIMARY KEY (player_id, match_id), 
-		FOREIGN KEY (player_id) REFERENCES player,
-		FOREIGN KEY (match_id) REFERENCES match,
+		PRIMARY KEY(match_id, player_id), 
+		FOREIGN KEY(player_id) REFERENCES player,
+		FOREIGN KEY(match_id) REFERENCES match,
 		FOREIGN KEY(team_id) REFERENCES team
 		);'''

@@ -273,7 +273,6 @@ def get_teams(season=0):
 def get_player_endpoints():
 	with open('csv/player_list.csv', newline='') as f:
 		reader = csv.reader(f)
-		#print(list(reader))
 		endpoints = {i[0] : i[1] for i in sorted(list(reader), key=lambda x: x[0])}
 	return endpoints
 

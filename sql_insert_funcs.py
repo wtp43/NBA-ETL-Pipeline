@@ -142,7 +142,7 @@ def imports_to_player_performance(cur):
 			(player_id, match_id, team_id, inactive,
 			ts_pct, efg_pct, threepar, ftr, orb_pct,
 			drb_pct, trb_pct, ast_pct, stl_pct, blk_pct,
-			tov_pct, usg_pct, ortg, drtg, bpm, starter, date, 
+			tov_pct, usg_pct, ortg, drtg, bpm, starter,
 			fg, fga, fg_pct, threep, threepa,
 			threep_pct, ft, fta, ft_pct, orb, drb, trb, ast,
 			stl, blk, tov, pf, pts, pm)
@@ -151,7 +151,7 @@ def imports_to_player_performance(cur):
 				im.ftr, im.orb_pct, im.drb_pct, im.trb_pct, 
 				im.ast_pct, im.stl_pct, im.blk_pct,
 				im.tov_pct, im.usg_pct, im.ortg, im.drtg, 
-				im.bpm, im.starter, im.date, im.fg, im.fga, im.fg_pct, 
+				im.bpm, im.starter, im.fg, im.fga, im.fg_pct, 
 				im.threep, im.threepa, im.threep_pct, 
 				im.ft, im.fta, im.ft_pct, im.orb, im.drb, im.trb, im.ast,
 				im.stl, im.blk, im.tov, im.pf, im.pts, im.pm
@@ -291,5 +291,4 @@ def insert_seasons(csv, cur):
 	with open(csv, 'r') as f: 
 		headers = next(f)
 		headers = headers.lstrip().rstrip().split(',')
-		print(headers)
 		cur.copy_from(f, 'season', columns=headers,sep=',')
