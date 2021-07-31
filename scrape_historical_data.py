@@ -22,7 +22,7 @@ def get_team_abbr():
 	
 	query = \
 		'''SELECT DISTINCT t.team_name, t.team_abbr
-			FROM team as t;'''
+			FROM team_name as t;'''
 	cur.execute(query)
 	
 	team_abbr = {}
@@ -107,7 +107,6 @@ def get_endpoints_df(html):
 				names.append(trs[i].a.text)
 				endpoints.append(trs[i].a['href'])
 
-		print(names)
 		df = DataFrame(list(zip(endpoints, names)))
 		return df
 	except Exception as err:
@@ -306,21 +305,60 @@ def boxscore_to_csv(match_html):
 			basic_df.drop(drop_rows, inplace=True)
 			basic_df.drop(['MP', 'Starters'], axis=1, inplace=True)
 			
+			# basic_df.rename(columns={'Starters': 'player_name', 'MP': 'sp',
+			# 	'+/-': 'pm'}, inplace=True)
+			# basic_df.columns = basic_df.columns.str.lower()
+			# basic_df.columns = [s.replace('%', '_pct') for s in basic_df.columns]
+			# basic_df.columns = [s.replace('3', 'three') for s in basic_df.columns]
+			# basic_df.columns = [s.replace('2', 'two') for s in basic_df.columns]	
+
+			
+			# basic_df = basic_df['fg', 'fga', 'fg_pct', 'threep', 'threepa', 
+			# 					'threep_pct', 'ft', 'fta', 'ft_pct', 'orb', 
+			# 					'drb', 'trb', 'ast', 'stl', 'blk', 'tov', 'pf', 
+			# 					'pts','pm']
+			
+			
 			df['MP'] = df['MP'].apply(seconder)
 
-			df = pd.concat([df, basic_df], axis = 1)
+			# cols = ["player_name", 'sp', 'ts_pct'	'efg_pct'	'threepar'	
+			# 'ftr'	'orb_pct'	'drb_pct'	'trb_pct'	'ast_pct'	'stl_pct'	
+			# 'blk_pct'	
+			# 'tov_pct'	'usg_pct'	'ortg'	'drtg'	'bpm'	'team_abbr'	
+			# 'starter'	'inactive'	'date'	'fg'	'fga'	'fg_pct'	'threep'	
+			# 'threepa'	'threep_pct'	'ft'	'fta'	'ft_pct'	'orb'	'drb''trb'	
+			# 'ast'	'stl'	'blk'	'tov'	'pf'	'pts'	'pm']
+			df = pd.concat([df, basic_df], axis = 1)	
+	
 			df.rename(columns={'Starters': 'player_name', 'MP': 'sp',
 				'+/-': 'pm'}, inplace=True)
-			
 			df.columns = df.columns.str.lower()
 			df.columns = [s.replace('%', '_pct') for s in df.columns]
 			df.columns = [s.replace('3', 'three') for s in df.columns]
 			df.columns = [s.replace('2', 'two') for s in df.columns]
+
+			# df = df['starters', 'mp', 'ts_pct', 'efg_pct', 'threepar', 'ftr', 
+			# 		'orb_pct','drb_pct', 'trb_pct', 'ast_pct', 'stl_pct', 'blk_pct', 
+			# 		'tov_pct', 'usg_pct', 'ortg', 'drtg', 'bpm', 'team_abbr', 'starter', 
+			# 		'inactive','date']
+
 			df.replace({'Did Not Play': 0, 
 						'Did Not Dress': 0,
 						'Not With Team': 0,
 						'Player Suspended': 0}, inplace=True)
 			df.fillna(0, inplace=True)
+			
+			cols = ['player_name', 'sp', 'ts_pct', 'efg_pct', 'threepar', 'ftr', 'orb_pct',
+					'drb_pct', 'trb_pct', 'ast_pct', 'stl_pct', 'blk_pct', 'tov_pct',
+					'usg_pct', 'ortg', 'drtg', 'bpm', 'team_abbr', 'starter', 'inactive',
+					'date', 'fg', 'fga', 'fg_pct', 'threep', 'threepa', 'threep_pct', 'ft',
+					'fta', 'ft_pct', 'orb', 'drb', 'trb', 'ast', 'stl', 'blk', 'tov', 'pf',
+					'pts', 'pm']
+
+			cols_to_keep = list(set(cols) & set(df.columns))
+
+			df = df[cols_to_keep]
+
 			if i == 0:
 				df.to_csv(file_path, mode='a',index=False, header=True)
 			else:
@@ -342,7 +380,7 @@ def boxscore_to_csv(match_html):
 				df.to_csv(file_path, mode='a',index=False, header=False)
 
 	except Exception as err:
-		logging.error(match_html+" boxscore processing failed")
+		logging.error(f"{match_html} boxscore processing failed: {err}")
 		raise err
 
 

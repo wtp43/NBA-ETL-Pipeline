@@ -18,6 +18,7 @@ def main():
 		
 		db_func.exec_query(conn, db_schema.create_season_table)
 		db_func.exec_query(conn, db_schema.create_team_table)
+		db_func.exec_query(conn, db_schema.create_team_name_table)
 		db_func.exec_query(conn, db_schema.create_arena_table)
 
 		db_func.exec_query(conn, db_schema.create_player_table)

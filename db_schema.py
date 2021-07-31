@@ -11,6 +11,13 @@ create_imports_table = \
 		playoff_game	REAL,
 		team_abbr		TEXT,
 
+		team_id			SERIAL,
+		home_id			SERIAL,
+		away_id			SERIAL,
+		team_name		TEXT,
+		active			REAL,
+		bbref_team		TEXT,
+
 		player_name		TEXT,
 		bbref_endpoint 	TEXT,
 		season			REAL,
@@ -81,21 +88,28 @@ create_season_table =\
 		
 create_arena_table = \
 	'''CREATE TABLE IF NOT EXISTS arena(
-		team_id					SMALLINT	NOT NULL,
+		team_id					SERIAL	NOT NULL,
 		home_arena_elevation	REAL		DEFAULT 0,
-		active					SMALLINT	DEFAULT 0,
-		inactive				SMALLINT 	DEFAULT 3000,
+		active					REAL	DEFAULT 0,
+		inactive				REAL 	DEFAULT 3000,
 		PRIMARY KEY(team_id)
 		);'''
 
 create_team_table = \
 	'''CREATE TABLE IF NOT EXISTS team(
-		team_id					SMALLINT	NOT NULL,
+		team_id					SERIAL	NOT NULL,
+		PRIMARY KEY(team_id)
+		);'''
+
+create_team_name_table = \
+	'''CREATE TABLE IF NOT EXISTS team_name(
+		team_id					SERIAL	NOT NULL,
 		team_abbr				TEXT		NOT NULL,
 		team_name				TEXT		NOT NULL,
-		active					SMALLINT	DEFAULT 0,
-		inactive				SMALLINT 	DEFAULT 3000,
-		PRIMARY KEY(team_name, team_id, active, inactive)
+		active					REAL	DEFAULT 0,
+		inactive				REAL 	DEFAULT 3000,
+		PRIMARY KEY(team_name, team_id, active, inactive),
+		FOREIGN KEY(team_id) REFERENCES team
 		);'''
 	
 create_player_table = \
@@ -110,7 +124,7 @@ create_player_table = \
 create_player_team_table = \
 	'''CREATE TABLE IF NOT EXISTS player_team(
 		player_id		SERIAL		NOT NULL,
-		team_abbr		TEXT		NOT NULL,
+		team_id			SERIAL		NOT NULL,
 		season			SMALLINT	NOT NULL,
 		age				REAL,
 		lg				TEXT,
@@ -140,8 +154,9 @@ create_player_team_table = \
 		tov				REAL,
 		pf				REAL,
 		pts				REAL,
-		PRIMARY KEY(player_id, team_abbr, season),
-		FOREIGN KEY (player_id) REFERENCES player
+		PRIMARY KEY(player_id, team_id, season),
+		FOREIGN KEY (player_id) REFERENCES player,
+		FOREIGN KEY(team_id) REFERENCES team
 		);'''
 
 create_match_table = \
@@ -150,11 +165,15 @@ create_match_table = \
 		date			DATE		NOT NULL,
 		away_pts		REAL		NOT NULL,
 		home_pts		REAL		NOT NULL,
-		away_abbr 		TEXT		NOT NULL,
-		home_abbr		TEXT		NOT NULL,
+		away_id 		SERIAL		NOT NULL,
+		home_id			SERIAL		NOT NULL,
 		playoff_game	REAL		NOT NULL,
 		elevation		REAL		DEFAULT 0,
-		PRIMARY KEY (match_id)
+		bbref_team		TEXT 		NOT NULL,
+		PRIMARY KEY (match_id),
+		FOREIGN KEY (home_id) REFERENCES team,
+		FOREIGN KEY (away_id) REFERENCES team
+
 		);'''
 
 create_bet_type_table = \
@@ -167,8 +186,8 @@ create_bet_type_table = \
 create_odds_table = \
 	'''CREATE TABLE IF NOT EXISTS odds(
 		match_id		SERIAL						NOT NULL,
-		team_id			SERIAL								,
-		team_abbr		TEXT						NOT NULL,
+		team_id			SERIAL						NOT NULL,
+		over_under		TEXT						,
 		datetime		TIMESTAMP WITH TIME ZONE	NOT NULL,
 		spread			REAL						DEFAULT 0,
 		sportsbook		TEXT						NOT NULL,
@@ -177,7 +196,7 @@ create_odds_table = \
 		vegas_odds		REAL						NOT NULL,
 		
 		PRIMARY KEY (match_id, sportsbook, bet_type_id, 
-					team_abbr, datetime),
+					team_id, datetime),
 		FOREIGN KEY (match_id) REFERENCES match,
 		FOREIGN KEY (bet_type_id) REFERENCES bet_type
 		);'''
@@ -196,7 +215,7 @@ create_player_performance_table = \
 	'''CREATE TABLE IF NOT EXISTS player_performance(
 		player_id		SERIAL		NOT NULL,
 		match_id		SERIAL		NOT NULL,
-		team_abbr		TEXT		NOT NULL,
+		team_id			SERIAL		NOT NULL,
 
 		sp				REAL		DEFAULT 0,
 		inactive 		REAL		DEFAULT 0,
@@ -238,5 +257,6 @@ create_player_performance_table = \
 		pm				REAL		DEFAULT 0,
 		PRIMARY KEY (player_id, match_id), 
 		FOREIGN KEY (player_id) REFERENCES player,
-		FOREIGN KEY (match_id) REFERENCES match
+		FOREIGN KEY (match_id) REFERENCES match,
+		FOREIGN KEY(team_id) REFERENCES team
 		);'''
