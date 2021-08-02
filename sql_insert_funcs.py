@@ -287,6 +287,25 @@ def imports_to_player_team(cur):
 	except Error as err:
 		raise err	
 
+def player_performance_to_injury(cur):
+	try:
+		query = \
+		'''INSERT INTO injury
+			(match_id, player_id)
+			SELECT pf.match_id, pf.player_id
+			FROM player_performance AS pf
+			WHERE 
+			pf.inactive = 1 AND
+			NOT EXISTS
+				(SELECT *
+					FROM injury AS i
+					WHERE i.match_id = pf.match_id AND
+					i.player_id = pf.player_id);'''
+		cur.execute(query)
+	except Error as err:
+		raise err
+
+
 def insert_seasons(csv, cur):
 	with open(csv, 'r') as f: 
 		headers = next(f)

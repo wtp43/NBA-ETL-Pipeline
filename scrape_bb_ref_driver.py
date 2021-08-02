@@ -353,9 +353,8 @@ def run_scraper():
 		process_matches(cur, seasons)
 		conn.commit()
 		db_func.truncate_imports(cur)
-
 		process_boxscores(cur)
-
+		sif.player_performance_to_injury(cur)
 		conn.commit()
 		logging.info("All players inserted")	
 			
