@@ -264,9 +264,9 @@ def boxscore_to_csv(match_html):
 		if not os.path.isdir(directory):
 			os.makedirs(directory)
 		file_path = directory+"/"+re.findall("[0-9]{9}[A-Z]{3}", match_html)[0] + ".csv"
-		# if os.path.isfile(file_path) and os.stat(file_path).st_size !=0:
+		if os.path.isfile(file_path) and os.stat(file_path).st_size !=0:
 		# 	logging.info(file_path +": has already been inserted to a csv")
-		# 	return
+			return
 		with open(file_path, 'w', encoding="utf8") as f:
 			f.truncate()
 		

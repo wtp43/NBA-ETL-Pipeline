@@ -145,7 +145,7 @@ def imports_to_player_performance(cur):
 			tov_pct, usg_pct, ortg, drtg, bpm, starter,
 			fg, fga, fg_pct, threep, threepa,
 			threep_pct, ft, fta, ft_pct, orb, drb, trb, ast,
-			stl, blk, tov, pf, pts, pm)
+			stl, blk, tov, pf, pts, pm, sp)
 			SELECT p.player_id, m.match_id, t.team_id, 
 				im.inactive, im.ts_pct, im.efg_pct, im.threepar, 
 				im.ftr, im.orb_pct, im.drb_pct, im.trb_pct, 
@@ -154,7 +154,8 @@ def imports_to_player_performance(cur):
 				im.bpm, im.starter, im.fg, im.fga, im.fg_pct, 
 				im.threep, im.threepa, im.threep_pct, 
 				im.ft, im.fta, im.ft_pct, im.orb, im.drb, im.trb, im.ast,
-				im.stl, im.blk, im.tov, im.pf, im.pts, im.pm
+				im.stl, im.blk, im.tov, im.pf, im.pts, im.pm,
+				im.sp
 			FROM imports AS im, player AS p, match AS m, 
 				player_team AS pt, season AS s, team_name AS t
 			WHERE im.player_name = p.player_name
