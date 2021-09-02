@@ -237,9 +237,13 @@ def vegas_to_decimal(vegas_odds):
 
 
 def main():
-	save_odds()
-	insert_odds()
-	fill_missing_odds()
+	try:
+		save_odds()
+		insert_odds()
+		fill_missing_odds()
+	except Exception:
+		 os.execv(sys.argv[0], sys.argv)
+
 
 if __name__ == '__main__':
 	main()

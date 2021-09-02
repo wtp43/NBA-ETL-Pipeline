@@ -65,6 +65,13 @@ def main():
 		html = 'bs4_html/players/l/luety01.html'
 		bbref_endpoint='/players/l/luety01.html'
 		player_name = 'ty'
+		db_func.truncate_imports(cur)
+		conn.commit()
+		sif.insert_to_imports('csv/boxscores/200710300GSW.csv')
+		conn.commit()
+		sif.imports_to_player_performance(cur)
+		conn.commit()
+		conn.close()
 		#err = shd.player_data_to_csv(html, bbref_endpoint, player_name)
 		#print(err)
 
@@ -76,7 +83,7 @@ def main():
 		#print(len(matches))
 
 		#shd.boxscore_to_csv('bs4_html/boxscores/201212150CHI.html')	
-		sif.insert_to_imports('csv/boxscores/201312070UTA.csv')
+		#sif.insert_to_imports('csv/boxscores/201312070UTA.csv')
 		#The page that contains the start of playoff table
 		#only needs rows after it modified
 		#While all pages after only contain playoff games
@@ -86,10 +93,6 @@ def main():
 	except Exception as err:
 		logging.exception(traceback.print_exception(*sys.exc_info()))
 		sys.exit()
-	finally:
-		if (conn):
-			conn.close()
-			print("PostgreSQL connection is closed")
 
 def test_process_players(cur, season):
 	sbrd.process_players(cur, ['2021'])
