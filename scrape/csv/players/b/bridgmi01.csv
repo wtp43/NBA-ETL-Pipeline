@@ -1,0 +1,5 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2019,22.0,PHO,NBA,SF,82,56,29.5,3.0,6.9,0.43,1.3,3.8,0.335,1.7,3.0,0.548,0.523,1.2,1.4,0.805,0.7,2.5,3.2,2.1,1.6,0.5,0.9,2.5,8.3,/players/b/bridgmi01.html,Mikal Bridges
+2020,23.0,PHO,NBA,SF,73,32,28.0,3.4,6.6,0.51,1.0,2.7,0.361,2.4,4.0,0.61,0.583,1.4,1.7,0.844,0.9,3.1,4.0,1.8,1.4,0.6,1.0,2.2,9.1,/players/b/bridgmi01.html,Mikal Bridges
+2021,24.0,PHO,NBA,SF,72,72,32.6,5.0,9.3,0.543,1.9,4.4,0.425,3.2,4.9,0.647,0.643,1.5,1.8,0.84,1.1,3.2,4.3,2.1,1.1,0.9,0.8,1.6,13.5,/players/b/bridgmi01.html,Mikal Bridges
+2022,25.0,PHO,NBA,SF,82,82,34.8,5.6,10.5,0.534,1.4,3.8,0.369,4.2,6.7,0.628,0.601,1.6,1.9,0.834,0.9,3.3,4.2,2.3,1.2,0.4,0.8,1.8,14.2,/players/b/bridgmi01.html,Mikal Bridges

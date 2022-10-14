@@ -1,0 +1,2 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2022,22.0,WAS,NBA,SF,77,36,23.4,3.0,6.7,0.455,1.5,4.2,0.35,1.6,2.5,0.629,0.564,0.7,0.8,0.871,0.7,2.0,2.7,1.1,0.5,0.3,0.6,1.2,8.2,/players/k/kispeco01.html,Corey Kispert

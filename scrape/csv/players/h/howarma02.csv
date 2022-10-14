@@ -1,0 +1,3 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2021,21.0,DEN,NBA,SG,37,1,5.5,1.1,2.9,0.377,0.5,1.8,0.277,0.6,1.1,0.537,0.462,0.2,0.2,0.778,0.0,0.5,0.6,0.5,0.1,0.0,0.5,0.6,2.8,/players/h/howarma02.html,Markus Howard
+2022,22.0,DEN,NBA,SG,31,0,5.7,1.3,3.3,0.386,0.9,2.3,0.4,0.4,1.0,0.355,0.525,0.6,0.7,0.87,0.1,0.3,0.4,0.2,0.3,0.0,0.2,0.5,4.1,/players/h/howarma02.html,Markus Howard

@@ -1,0 +1,2 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2022,20.0,ORL,NBA,PG,48,45,27.2,4.1,11.4,0.361,0.9,4.1,0.214,3.3,7.3,0.443,0.4,2.6,3.4,0.773,0.5,3.0,3.6,4.4,1.2,0.4,3.0,3.0,11.8,/players/s/suggsja01.html,Jalen Suggs

@@ -1,0 +1,2 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2022,22.0,SAS,NBA,SG,29,0,7.1,0.7,1.9,0.357,0.5,1.5,0.326,0.2,0.4,0.462,0.482,0.2,0.4,0.538,0.1,0.3,0.5,0.3,0.1,0.1,0.1,0.5,2.1,/players/w/wieskjo01.html,Joe Wieskamp

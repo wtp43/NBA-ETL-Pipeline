@@ -1,0 +1,5 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2015,19.0,BOS,NBA,SG,31.0,0.0,10.7,1.2,3.3,0.353,0.5,2.1,0.258,0.6,1.2,0.528,0.436,0.5,0.9,0.552,0.3,1.1,1.4,0.4,0.3,0.1,0.2,0.7,3.4,/players/y/youngja01.html,James Young
+2016,20.0,BOS,NBA,SG,29.0,0.0,6.9,0.4,1.2,0.306,0.2,0.9,0.231,0.2,0.3,0.5,0.389,0.0,0.1,0.25,0.1,0.8,0.9,0.3,0.2,0.0,0.2,0.6,1.0,/players/y/youngja01.html,James Young
+2017,21.0,BOS,NBA,SG,29.0,0.0,7.6,0.9,2.0,0.431,0.4,1.2,0.343,0.4,0.8,0.565,0.534,0.2,0.3,0.667,0.2,0.7,0.9,0.1,0.3,0.1,0.1,0.5,2.3,/players/y/youngja01.html,James Young
+2018,22.0,PHI,NBA,SG,6.0,0.0,10.2,0.8,2.3,0.357,0.5,1.7,0.3,0.3,0.7,0.5,0.464,0.7,1.0,0.667,0.0,0.3,0.3,0.3,0.0,0.0,0.2,0.7,2.8,/players/y/youngja01.html,James Young

@@ -1,0 +1,2 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2017,24.0,OKC,NBA,PG,64,1,15.2,1.2,3.5,0.345,0.2,1.0,0.19,1.0,2.5,0.406,0.372,0.3,0.5,0.548,0.3,1.1,1.4,2.0,0.4,0.1,0.7,1.2,2.9,/players/c/chrisse01.html,Semaj Christon

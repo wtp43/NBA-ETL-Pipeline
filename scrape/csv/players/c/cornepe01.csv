@@ -1,0 +1,2 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2022,26.0,DEN,NBA,PF,13,0,2.9,0.4,1.2,0.333,0.1,0.6,0.125,0.3,0.5,0.571,0.367,0.2,0.3,0.75,0.5,0.5,1.1,0.2,0.1,0.1,0.3,0.5,1.1,/players/c/cornepe01.html,Petr Cornelie

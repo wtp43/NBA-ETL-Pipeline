@@ -1,0 +1,6 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2017,20.0,SAS,NBA,PG,38,8,8.5,1.3,3.1,.431,0.2,0.6,.391,1.1,2.4,.441,.470,0.6,0.8,.700,0.2,0.9,1.1,1.3,0.2,0.2,1.0,0.8,3.4,/players/m/murrade01.html,Dejounte Murray
+2018,21.0,SAS,NBA,PG,81,48,21.5,3.3,7.5,.443,0.1,0.4,.265,3.2,7.1,.454,.451,1.3,1.8,.709,1.4,4.3,5.7,2.9,1.2,0.4,1.7,1.9,8.1,/players/m/murrade01.html,Dejounte Murray
+2020,23.0,SAS,NBA,PG,66,58,25.6,4.5,9.7,.462,0.6,1.7,.369,3.8,8.0,.481,.494,1.4,1.7,.798,1.0,4.8,5.8,4.1,1.7,0.3,1.9,2.2,10.9,/players/m/murrade01.html,Dejounte Murray
+2021,24.0,SAS,NBA,PG,67,67,31.9,6.6,14.5,.453,0.9,3.0,.317,5.6,11.6,.488,.485,1.6,2.0,.791,0.9,6.2,7.1,5.4,1.5,0.1,1.7,2.0,15.7,/players/m/murrade01.html,Dejounte Murray
+2022,25.0,SAS,NBA,PG,68,68,34.8,8.4,18.3,.462,1.4,4.3,.327,7.0,13.9,.504,.500,2.9,3.6,.794,1.2,7.1,8.3,9.2,2.0,0.3,2.6,2.0,21.1,/players/m/murrade01.html,Dejounte Murray

@@ -1,0 +1,3 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2012,25.0,NYK,NBA,C,21.0,0.0,5.1,0.8,1.6,0.515,0.0,0.0,0.0,0.8,1.6,0.515,0.515,0.4,0.5,0.8,0.7,0.6,1.3,0.2,0.0,0.3,0.1,0.7,2.0,/players/j/jordaje01.html,Jerome Jordan
+2015,28.0,BRK,NBA,C,44.0,0.0,8.7,1.1,2.1,0.532,0.0,0.0,0.0,1.1,2.1,0.532,0.532,0.9,1.0,0.864,1.2,1.2,2.4,0.3,0.2,0.3,0.5,1.3,3.1,/players/j/jordaje01.html,Jerome Jordan

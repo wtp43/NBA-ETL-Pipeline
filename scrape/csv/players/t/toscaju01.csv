@@ -1,0 +1,4 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2020,26.0,GSW,NBA,SG,13,6,20.9,2.2,4.8,0.46,0.6,1.8,0.348,1.6,3.1,0.525,0.524,0.2,0.4,0.6,0.7,3.3,4.0,2.0,1.0,0.4,1.2,2.3,5.3,/players/t/toscaju01.html,Juan Toscano-Anderson
+2021,27.0,GSW,NBA,SG,53,16,20.9,2.3,3.9,0.579,0.7,1.7,0.402,1.6,2.2,0.718,0.667,0.4,0.6,0.71,0.5,3.9,4.4,2.8,0.8,0.5,1.2,2.1,5.7,/players/t/toscaju01.html,Juan Toscano-Anderson
+2022,28.0,GSW,NBA,SF,73,6,13.6,1.6,3.2,0.489,0.4,1.2,0.322,1.2,2.0,0.588,0.549,0.5,1.0,0.571,0.4,2.0,2.4,1.7,0.7,0.2,0.9,1.6,4.1,/players/t/toscaju01.html,Juan Toscano-Anderson

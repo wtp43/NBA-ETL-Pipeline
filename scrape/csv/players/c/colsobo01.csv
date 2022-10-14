@@ -1,0 +1,2 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2019,23.0,MIL,NBA,SF,8,2,12.3,1.6,4.9,0.333,0.6,2.6,0.238,1.0,2.3,0.444,0.397,1.0,1.1,0.889,1.0,2.8,3.8,0.4,0.6,0.1,0.4,0.4,4.9,/players/c/colsobo01.html,Bonzie Colson

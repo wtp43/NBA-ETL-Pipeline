@@ -1,0 +1,2 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2022,21.0,DEN,NBA,SG,69,4,19.0,3.3,8.3,0.403,1.9,5.2,0.366,1.4,3.1,0.465,0.518,1.6,1.8,0.856,0.2,2.5,2.7,2.8,0.6,0.3,1.2,2.2,10.1,/players/h/hylanbo01.html,Bones Hyland

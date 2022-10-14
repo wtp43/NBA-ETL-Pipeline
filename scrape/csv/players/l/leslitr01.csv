@@ -1,0 +1,2 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2012,21.0,LAC,NBA,SG,10,0,4.5,0.5,1.4,0.357,0.0,0.0,0.0,0.5,1.4,0.357,0.357,0.4,0.9,0.444,0.6,0.3,0.9,0.5,0.2,0.2,0.2,0.4,1.4,/players/l/leslitr01.html,Travis Leslie

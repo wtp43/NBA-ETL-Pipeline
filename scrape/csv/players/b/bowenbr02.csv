@@ -1,0 +1,3 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2020,21.0,IND,NBA,SF,6,1,5.2,0.5,1.7,0.3,0.0,0.3,0.0,0.5,1.3,0.375,0.3,0.0,0.0,0.0,0.2,1.0,1.2,0.0,0.0,0.2,0.2,0.5,1.0,/players/b/bowenbr02.html,Brian Bowen
+2021,22.0,IND,NBA,SF,6,0,2.5,0.2,0.7,0.25,0.0,0.2,0.0,0.2,0.5,0.333,0.25,0.2,0.2,1.0,0.0,0.5,0.5,0.0,0.0,0.0,0.0,0.2,0.5,/players/b/bowenbr02.html,Brian Bowen

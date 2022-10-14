@@ -1,0 +1,6 @@
+season,age,team_abbr,lg,pos,g,gs,mp,fg,fga,fg_pct,threep,threepa,threep_pct,twop,twopa,twop_pct,efg_pct,ft,fta,ft_pct,orb,drb,trb,ast,stl,blk,tov,pf,pts,bbref_endpoint,player_name
+2003,19.0,MIL,NBA,PF,5.0,0.0,1.6,0.0,0.4,0.0,0.0,0.0,0.0,0.0,0.4,0.0,0.0,0.0,0.0,0.0,0.2,0.2,0.4,0.2,0.2,0.0,0.0,0.0,0.0,/players/s/sampsja01.html,Jamal Sampson
+2004,20.0,LAL,NBA,C,10.0,2.0,13.0,1.1,2.3,0.478,0.0,0.0,0.0,1.1,2.3,0.478,0.478,0.7,1.2,0.583,2.3,2.9,5.2,0.7,0.2,0.4,0.6,1.6,2.9,/players/s/sampsja01.html,Jamal Sampson
+2005,21.0,CHA,NBA,PF,23.0,0.0,14.3,1.2,2.7,0.452,0.0,0.0,0.0,1.2,2.7,0.452,0.452,1.0,1.7,0.59,1.6,3.7,5.3,0.3,0.2,0.7,0.7,2.3,3.4,/players/s/sampsja01.html,Jamal Sampson
+2006,22.0,SAC,NBA,PF,12.0,0.0,3.3,0.4,0.6,0.714,0.0,0.0,0.0,0.4,0.6,0.714,0.714,0.0,0.2,0.0,0.4,1.1,1.5,0.4,0.0,0.3,0.0,0.4,0.8,/players/s/sampsja01.html,Jamal Sampson
+2007,23.0,DEN,NBA,C,22.0,3.0,5.7,0.4,0.6,0.643,0.0,0.0,0.0,0.4,0.6,0.692,0.643,0.3,0.6,0.429,0.7,1.5,2.2,0.2,0.1,0.3,0.5,0.8,1.1,/players/s/sampsja01.html,Jamal Sampson
