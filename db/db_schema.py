@@ -74,8 +74,8 @@ create_imports_table = \
 		spread			REAL,
 		bet_type_id		SERIAL,
 		decimal_odds	REAL,
-		vegas_odds		REAL	
-
+		vegas_odds		REAL,
+		Notes			TEXT
 		);'''
 
 create_season_table =\

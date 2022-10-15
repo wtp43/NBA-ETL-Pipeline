@@ -138,7 +138,7 @@ def save_odds():
 		get_odds(season, start_date, end_date, 'ps')
 		get_odds(season, start_date, end_date, 'total')
 
-	conn.close()
+	threaded_postgreSQL_pool.putconn(conn)
 
 def insert_odds():
 	conn = db_func.get_conn()
@@ -153,7 +153,7 @@ def insert_odds():
 	db_func.truncate_imports(cur)
 	csvs = [f'csv/odds/{f}' for f in listdir('csv/odds') if isfile(join('csv/odds', f))]
 	for csv in tqdm(csvs, colour='red', position=1):
-		sif.insert_to_imports(csv)
+		sif.copy_to_imports(cur,csv)
 	conn.commit()
 
 	query = '''ANALYZE imports'''
@@ -168,7 +168,7 @@ def insert_odds():
 	sif.imports_to_bets_total(cur)
 
 	conn.commit()
-	conn.close()
+	threaded_postgreSQL_pool.putconn(conn)
 
 #Sportsbookreview is missing odds for certain matches (OKC-Seattle Supersonics and others)
 #They will be filled in using moneyline odds data from sportsbookreviewonline.com
@@ -188,12 +188,12 @@ def fill_missing_odds():
 	modified_csvs = [f'csv/sbro_odds/modified/{f}' for f in listdir('csv/sbro_odds/modified') 
 				if isfile(join('csv/sbro_odds/modified', f))]
 	for csv in tqdm(modified_csvs, colour='red', position=1):
-		sif.insert_to_imports(csv)
+		sif.copy_to_imports(cur,csv)
 	conn.commit()
 	sif.fill_missing_odds(cur)
 	
 	conn.commit()
-	conn.close()
+	threaded_postgreSQL_pool.putconn(conn)
 
 def modify_sbro_odds(csv):
 	df = pd.read_csv(csv)

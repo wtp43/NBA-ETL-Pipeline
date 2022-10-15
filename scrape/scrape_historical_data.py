@@ -7,7 +7,7 @@ import pandas as pd
 import db_func as db_func
 import logging
 from pandas.core.frame import DataFrame
-
+import time
 
 DEBUG = False
 pd.options.display.max_columns = None
@@ -26,8 +26,8 @@ def get_team_abbr():
 	team_abbr = {}
 	for key, val in cur.fetchall():
 		team_abbr[key] = val
+	#threaded_postgreSQL_pool.putconn(conn)
 	conn.close()
-	
 	return team_abbr
 
 def player_data_to_csv(html, bbref_endpoint, player_name):
@@ -43,14 +43,18 @@ def player_data_to_csv(html, bbref_endpoint, player_name):
     """
 	try:
 		file_path = 'csv' + bbref_endpoint[:-5] + '.csv'
+		
 		if os.path.isfile(file_path):
 			return 0
 		with open(html, 'r', encoding="utf8") as f:
 			contents = f.read()
 			soup = BeautifulSoup(contents, 'lxml')
 		table = soup.find_all('table', attrs={'id': 'per_game'})
+		#per_game stats are all regular season games. Some players have only played playoff games
+		if not table: 
+			table = soup.find_all('table', attrs={'id': 'playoffs_per_game'})
 		if not table:
-			return 1
+			return 
 		df = pd.read_html(str(table), flavor='bs4', header=[0])[0]
 		df.columns = df.columns.str.lower()
 		df.columns = [s.replace('%', '_pct') for s in df.columns]
@@ -85,6 +89,7 @@ def player_data_to_csv(html, bbref_endpoint, player_name):
 		df.to_csv(file_path, mode='w+',index=False, header=True)
 		return 0
 	except Exception as err:
+		print(err)
 		raise err
 
 def get_endpoints_df(html):
@@ -188,6 +193,7 @@ def match_list_to_csv(match_list_html):
 		for i in range(len(match_urls)):
 			url = 'http://basketball-reference.com' + match_urls[i]
 			html = 'bs4_html/' + match_urls[i]
+			time.sleep(1.5)
 			save_html(url, html)
 			with open(html, 'r', encoding="utf8") as f:
 				contents = f.read()
@@ -214,7 +220,8 @@ def match_list_to_csv(match_list_html):
 
 			df.drop(columns=df.columns[[1,6,7,8,9]], inplace=True)
 			df.rename(columns={'Date':'date', 'Visitor/Neutral': 'away_abbr', 
-				'Home/Neutral': 'home_abbr', 'PTS': 'away_pts', 'PTS.1': 'home_pts'}, inplace=True)
+				'Home/Neutral': 'home_abbr', 'PTS': 'away_pts', 'PTS.1': 'home_pts', 
+				'Notes' : 'notes'}, inplace=True)
 
 			df['date'] = pd.to_datetime(df.date)
 			df = df[df['away_pts'].notna()]

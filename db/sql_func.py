@@ -2,19 +2,11 @@ import db_func as db_func
 from psycopg2 import Error
 
 
-
-def insert_to_imports(csv):
-	try:
-		conn = db_func.get_conn()
-		cur = conn.cursor()
-		with open(csv, 'r') as f:
-			headers = next(f)
-			headers = headers.lstrip().rstrip().split(',')
-			cur.copy_from(f, 'imports', columns=headers,sep=',')
-		conn.commit()
-		conn.close()
-	except Error as err:
-		raise err
+def copy_to_imports(cur,csv):
+	with open(csv, 'r') as f:
+		headers = next(f)
+		headers = headers.lstrip().rstrip().split(',')
+		cur.copy_from(f, 'imports', columns=headers,sep=',')
 
 def insert_bet_type(csv, cur):
 	with open(csv, 'r') as f: 

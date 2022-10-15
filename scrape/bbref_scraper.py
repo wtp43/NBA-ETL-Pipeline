@@ -3,31 +3,32 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) +
 import sql_func as sif
 import db_func
 import scrape_historical_data as shd
-from dotenv import load_dotenv
-from pathlib import Path
 
-import psycopg2
+import istarmap
+import tqdm
 from psycopg2 import Error
 import logging
 from multiprocessing import Pool, cpu_count, Lock
-import time
 from timeit import default_timer as timer
 import traceback
 from datetime import date, datetime
 import itertools
 import csv
 from pandas.core.frame import DataFrame
-import pandas as pd
+import time
 
 
+POOL_SIZE = 15
 
+DEBUG = True
 
-DEBUG = False
-
-def init_child(lock_):
+def init_child(lock_, connection_required=False):
 	global lock
 	lock = lock_
-	
+	if connection_required:
+		global conn, cur
+		conn = db_func.get_conn()
+		cur = conn.cursor()
 
 def get_all_seasons(cur):
 	try:
@@ -40,9 +41,9 @@ def get_all_seasons(cur):
 		raise err
 
 
-def mproc_save_player_endpoints(team,season):
+def save_player_endpoints(team,season):
 	'''
-    mproc_save_player_endpoints 
+    save_player_endpoints 
 
 	Args: 
 		:param team: endpoint of player on bbref
@@ -59,21 +60,62 @@ def mproc_save_player_endpoints(team,season):
 			'/' + season + '.html'
 		html = os.path.join(os.getcwd(),"bs4_html/roster/" + season + \
 			"/" +team+".html")
-		with lock:
-			time.sleep(1.5)
-			shd.save_html(url, html)
+		if not os.path.isfile(html) or os.stat(html).st_size ==0:
+			with lock:
+				time.sleep(1.5)
+				shd.save_html(url, html)
+		
 		df = shd.get_endpoints_df(html)
-
 		csv = 'csv/player_list.csv'
 		with lock:
 			df.to_csv(csv, mode='a+',index=False, header=False)
 
 	except Exception as err:
-		logging.error("mproc_save_player_endpoints error: {}, {}".format(team, season))
+		logging.error("save_player_endpoints error: {}, {}".format(team, season))
+		raise err
+
+def insert_matches(season):
+	'''
+	Insert all matches given a season
+	Args: 
+		:param season: season given in a tuple
+			ex: (2020,)
+	:side effect: csv with match stats
+    :return: None
+    '''
+	try:
+		season = season[0]
+		url = "https://www.basketball-reference.com/leagues/NBA_" + season \
+				+ "_games.html"
+		html = os.path.join(os.getcwd(),"bs4_html/match_list/" \
+			+ "/" +season+".html")
+		if not os.path.isfile(html) or os.stat(html).st_size ==0:
+			with lock:
+				time.sleep(1.5)
+				shd.save_html(url, html)
+		
+		shd.match_list_to_csv(html)
+		csv = os.path.join(os.getcwd(),"csv/match_lists/" + season \
+			+ "_match_list.csv")
+		sif.copy_to_imports(cur,csv)	
+		conn.commit()
+	except Exception as err:
 		raise err
 
 
-def mproc_insert_players(bbref_endpoint, player_name):
+def mproc_matches(cur, seasons):
+	db_func.truncate_imports(cur)
+	lock = Lock()
+	print(f'starting computations on {POOL_SIZE} cores')
+	with Pool(POOL_SIZE, initializer=init_child,initargs=(lock,True)) as pool:
+		for _ in tqdm.tqdm(pool.map(insert_matches, seasons, 
+							chunksize=len(seasons)//POOL_SIZE),
+                           total=len(seasons)):		   
+				pass
+	sif.imports_to_match(cur)
+
+
+def insert_player(bbref_endpoint, player_name):
 	'''
     Wrapper function 
 		1. Save html of bbref_player_endpoint
@@ -92,144 +134,69 @@ def mproc_insert_players(bbref_endpoint, player_name):
 	try:
 		url = "https://www.basketball-reference.com" + bbref_endpoint 
 		html = os.path.join(os.getcwd(),"bs4_html" + bbref_endpoint)
-		
-		with lock:
-			time.sleep(1.5)
-			shd.save_html(url, html)
-		# with lock:
-		# 	logging.info('bbref_endpoint: {}, player_name: {} scraped'
-		# 	.format(bbref_endpoint, player_name)) 
-		
+		if not os.path.isfile(html) or os.stat(html).st_size ==0:
+			with lock:
+				time.sleep(1.5)
+				shd.save_html(url, html)
+
 		err = shd.player_data_to_csv(html, bbref_endpoint, player_name)
 		if err:
 			with lock:
+				print(html, bbref_endpoint, player_name)
 				logging.info('bbref_endpoint: {}, player_name: {} NO DATA FOUND'
 			.format(bbref_endpoint, player_name))
 			return 
-				
-		# with lock:
-		# 	logging.info('bbref_endpoint: {}, player_name: {} saved to csv'
-		# 	.format(bbref_endpoint, player_name)) 
-		
+			
 		#Insert player data into imports
 		file_path = 'csv' + bbref_endpoint[:-5] + '.csv'
-		sif.insert_to_imports(file_path)
-		# with lock:
-		# 	logging.info('endpoint: {}, player: {} inserted into imports table'
-		# 	.format(bbref_endpoint, player_name)) 
-
+		sif.copy_to_imports(cur, file_path)
+		conn.commit()
 		
 	except Exception as err:
 		raise err
 
-def mproc_insert_matches(season):
-	'''
-    Wrapper function 
-		1. Save html of match list
-		2. Scrape relevant matches from html 
-		3. Save to CSV
-		4. Copy CSV to match_import table
 
-	Args: 
-		:param season: season given in a tuple
-			ex: (2020,)
-	:side effect: csv with match stats
-    :return: None
-    '''
-	try:
-		season = season[0]
-		url = "https://www.basketball-reference.com/leagues/NBA_" + season \
-				+ "_games.html"
-		html = os.path.join(os.getcwd(),"bs4_html/match_list/" \
-			+ "/" +season+".html")
-
-		with lock:
-			time.sleep(1.5)
-			shd.save_html(url, html)
-		# with lock:
-		# 	logging.info(season+" season html saved")
-		
-		shd.match_list_to_csv(html)
-		# with lock:
-		# 	logging.info(season+" season matches saved to csv")
-		
-		csv = os.path.join(os.getcwd(),"csv/match_lists/" + season \
-			+ "_match_list.csv")
-		sif.insert_to_imports(csv)
-
-		# with lock:
-		# 	logging.info(season +": season matches inserted into imports table")
-
-	except Exception as err:
-		raise err
-
-
-def process_matches(cur, seasons):
-	db_func.truncate_imports(cur)
-	lock = Lock()
-	pool_size = cpu_count()-1
-	print(f'starting computations on {pool_size} cores')
-	with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
-		pool.map(mproc_insert_matches, seasons)
-	sif.imports_to_match(cur)
-
-def process_players(cur, seasons):
+def mproc_players(cur, seasons):
 	#truncate imports
-	save_player_endpoints(seasons)
+	mproc_player_endpoints(seasons)
 	endpoints = get_player_endpoints()
-
 	lock = Lock()
-	pool_size = cpu_count()-1
-	with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
-		pool.starmap(mproc_insert_players, ((key,val) for key, val in endpoints.items()))
+
+	with Pool(POOL_SIZE, initializer=init_child,initargs=(lock,True)) as pool:
+		for _ in tqdm.tqdm(pool.starmap(insert_player, 
+							((key,val) for key, val in endpoints.items()),
+							chunksize=len(endpoints)//POOL_SIZE),
+                           total=len(endpoints)):		   
+				pass
 	sif.imports_to_player(cur)
 	sif.imports_to_player_team(cur)
 
-def process_boxscores(cur):
+
+def mproc_boxscores(cur):
 	lock = Lock()
-	pool_size = cpu_count()-1
 	matches = get_matches()
-	with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
-		pool.starmap(mproc_insert_boxscores, matches)
+	with Pool(POOL_SIZE, initializer=init_child,initargs=(lock,True)) as pool:
+		for _ in tqdm.tqdm(pool.starmap(insert_boxscores, matches, 
+							chunksize=len(matches)//POOL_SIZE),
+							total=len(matches)):
+			pass			
 	sif.imports_to_player_performance(cur)
 
-def mproc_insert_boxscores(date, home_abbr):
-	'''
-    Wrapper function 
-		1. Save html of match list
-		2. Scrape relevant matches from html 
-		3. Save to CSV
-		4. Copy CSV to match_import table
 
-	Args: 
-		:param season: season given in a tuple
-			ex: (2020,)
-	:side effect: csv with match stats
-    :return: None
-    '''
+def insert_boxscores(date, home_abbr):
 	try:
 		date = date.strftime('%Y%m%d')
 		bbref_endpoint = date + '0' + home_abbr
 		url = "https://www.basketball-reference.com/boxscores/"+bbref_endpoint+".html"
 		html = os.path.join(os.getcwd(),"bs4_html/boxscores/"+bbref_endpoint+".html")
-
-		with lock:
-			time.sleep(1.5)
-			shd.save_html(url, html)
-		# with lock:
-		# 	logging.info(bbref_endpoint+" html saved")
-		
-
+		if not os.path.isfile(html) or os.stat(html).st_size ==0:
+			with lock:
+				time.sleep(1.5)
+				shd.save_html(url, html)
 		shd.boxscore_to_csv(html)
-
-		# with lock:
-		# 	logging.info(bbref_endpoint+" boxscore saved to csv")
-		
 		csv = os.path.join(os.getcwd(),"csv/boxscores/"+bbref_endpoint+".csv")
-		sif.insert_to_imports(csv)
-		# with lock:
-		# 	logging.info(bbref_endpoint+" boxscore inserted into imports table")
-
+		sif.copy_to_imports(cur,csv)
+		conn.commit()
 	except Exception as err:	
 		logging.error(bbref_endpoint+" boxscore processing failed")
 	return
@@ -259,11 +226,8 @@ def get_matches(start_date=datetime.fromisoformat('1900-01-01'),
 
 #Currently only gets all teams for one season
 #Returns team abbreviations
-def get_teams(season=0):
+def get_teams(cur, season=0):
 	#Do not use % operator to format query directly (prone to SQL injections)
-	conn = db_func.get_conn()
-	cur = conn.cursor()
-
 	if season == 0:
 		query = \
 		'''SELECT team_abbr
@@ -278,7 +242,6 @@ def get_teams(season=0):
 		cur.execute(query, (season, season))
 	teams = cur.fetchall()
 	teams = [teams[i][0] for i in range(len(teams))]
-	conn.close()
 	return teams
 
 
@@ -288,7 +251,8 @@ def get_player_endpoints():
 		endpoints = {i[0] : i[1] for i in sorted(list(reader), key=lambda x: x[0])}
 	return endpoints
 
-def save_player_endpoints(seasons):
+
+def mproc_player_endpoints(seasons):
 	'''
     Wrapper function 
 		1. Scrape all endpoints for teams x seasons
@@ -306,17 +270,17 @@ def save_player_endpoints(seasons):
 			os.makedirs('csv')
 		with open('csv/player_list.csv', newline='', mode='w+') as f:
 			f.truncate()
-
-		pool_size = cpu_count()-1
-		if DEBUG:
-			pool_size = 1
 		lock = Lock()
-		
+		conn = db_func.get_conn()
+		cur = conn.cursor()
 		for s in seasons:
-			teams = get_teams(s)
-			with Pool(pool_size, initializer=init_child,initargs=(lock,)) as pool:
-				pool.starmap(mproc_save_player_endpoints, list(itertools.product(teams, [s])))
-		
+			teams = get_teams(cur, s)
+			with Pool(POOL_SIZE, initializer=init_child,initargs=(lock,)) as pool:
+				for _ in tqdm.tqdm(pool.starmap(save_player_endpoints, 
+									list(itertools.product(teams, [s]))),
+									total=len(teams)):
+					pass
+		conn.close()
 	except Exception as err:
 		logging.exception(traceback.print_exception(*sys.exc_info()))
 		sys.exit()
@@ -333,14 +297,12 @@ def scrape(start_date=1, end_date=1):
 							logging.StreamHandler()])	
 
 	try:
-		basepath = Path()
-		# Load the environment variables
-		envars = basepath.cwd().parent.joinpath('db/db.env')
-		load_dotenv(envars)
 		start = timer()
+		# Use getconn() method to Get Connection from connection pool
 		conn = db_func.get_conn()
 		cur = conn.cursor()
 		conn.autocommit = True
+	
 		team_list_path = 'target/NBA_Teams.csv'
 		seasons_path = 'target/seasons.csv'
 		seasons = get_all_seasons(cur)
@@ -354,28 +316,31 @@ def scrape(start_date=1, end_date=1):
 		
 		if DEBUG:
 			print(seasons)
-			print(len(get_teams(seasons[0][0])))
+			print(len(get_teams(cur,seasons[0][0])))
 		
 		#insert team names and abbreviations to database
-		if len(get_teams(seasons[0][0])) <= 0:
+		if len(get_teams(cur, seasons[0][0])) <= 0:
 			db_func.truncate_imports(cur)
-			sif.insert_to_imports(team_list_path)
+			sif.copy_to_imports(cur, team_list_path)
 			sif.imports_to_team(cur)
 			sif.imports_to_team_name(cur)
 			conn.commit()
 
-
 		db_func.truncate_imports(cur)
-		process_players(cur, seasons)
-		conn.commit()
-		db_func.truncate_imports(cur)
-		process_matches(cur, seasons)
-		conn.commit()
-		db_func.truncate_imports(cur)
-		process_boxscores(cur)
-		sif.player_performance_to_injury(cur)
+		logging.info("Inserting players...")
+		mproc_players(cur, seasons)
 		conn.commit()
 		logging.info("All players inserted")	
+		db_func.truncate_imports(cur)
+		logging.info("Inserting matches...")
+		mproc_matches(cur, seasons)
+		conn.commit()
+		logging.info("All matches inserted")	
+		db_func.truncate_imports(cur)
+		logging.info("Inserting boxscores...")
+		mproc_boxscores(cur)
+		sif.player_performance_to_injury(cur)
+		conn.commit()
 			
 		end = timer()
 		print(f'elapsed time: {end - start}')
@@ -384,9 +349,8 @@ def scrape(start_date=1, end_date=1):
 		conn.rollback()
 		sys.exit()
 	finally:
-		if (conn):
-			conn.close()
-			print("PostgreSQL connection is closed")
+		conn.close()
+		print("PostgreSQL connection is closed")
 
 def update():
 	#date range
@@ -395,5 +359,6 @@ def update():
 	#hash compare player html profiles
 	#store the new html files in a temp
 	#clear temp folder after use
+	#get last date from db
 	return
 

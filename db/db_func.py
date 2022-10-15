@@ -1,8 +1,23 @@
 import psycopg2
-from psycopg2 import Error
+from psycopg2 import Error, pool
 import sys
 import os
+from dotenv import load_dotenv
+from pathlib import Path
 
+basepath = Path()
+# Load the environment variables
+envars = basepath.cwd().parent.joinpath('db/db.env')
+load_dotenv(envars)
+
+# threaded_postgreSQL_pool = psycopg2.pool.ThreadedConnectionPool(1, 20,
+# 									user = os.getenv('DBUSER'),
+# 									password = os.getenv('PASSWORD'),
+# 									host = os.getenv('HOST'),
+# 									port = os.getenv('PORT'),
+# 									database = os.getenv('DATABASE'), 
+# 									sslmode='require')
+#threaded_postgreSQL_pool = []
 def truncate_imports(cur):
 	try:
 		cur.execute('TRUNCATE TABLE imports;')
@@ -11,18 +26,28 @@ def truncate_imports(cur):
 
 def get_conn():
 	try:
-		# create connection and cursor    
-		# conn = psycopg2.connect(user = os.getenv('USER'),
-		# 							password = os.getenv('PASSWORD'),
-		# 							host = os.getenv('HOST'),
-		# 							port = os.getenv('PORT'),
-		# 							database = os.getenv('DATABASE'))
-		# Get the base directory
-		conn = psycopg2.connect(os.getenv('DATABASE_URL'), sslmode='require')
+		basepath = Path()
+		# Load the environment variables
+		envars = basepath.cwd().parent.joinpath('db/db.env')
+		load_dotenv(envars)
+		#create connection and cursor
+		conn = psycopg2.connect(user = os.getenv('DBUSER'),
+									password = os.getenv('PASSWORD'),
+									host = os.getenv('HOST'),
+									port = os.getenv('PORT'),
+									database = os.getenv('DATABASE')) 
+									#sslmode='require')
+		#Get the base directory
+		#conn = psycopg2.connect(os.getenv('DATABASE_URL'), sslmode='require')
+		# conn = psycopg2.connect(database_url, sslmode='require')
+		#conn = threaded_postgreSQL_pool.getconn()
+		#conn.autocommit = True
+
 	except Exception as err:
 		raise err
 	return conn
-	
+
+
 def print_psycopg2_exception(err):
     # get details about the exception
     err_type, traceback = sys.exc_info()
