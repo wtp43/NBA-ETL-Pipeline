@@ -26,7 +26,6 @@ def get_team_abbr():
 	team_abbr = {}
 	for key, val in cur.fetchall():
 		team_abbr[key] = val
-	#threaded_postgreSQL_pool.putconn(conn)
 	conn.close()
 	return team_abbr
 
@@ -220,9 +219,8 @@ def match_list_to_csv(match_list_html):
 
 			df.drop(columns=df.columns[[1,6,7,8,9]], inplace=True)
 			df.rename(columns={'Date':'date', 'Visitor/Neutral': 'away_abbr', 
-				'Home/Neutral': 'home_abbr', 'PTS': 'away_pts', 'PTS.1': 'home_pts', 
-				'Notes' : 'notes'}, inplace=True)
-
+				'Home/Neutral': 'home_abbr', 'PTS': 'away_pts', 'PTS.1': 'home_pts'}, inplace=True)
+			df.drop(columns='Notes',axis=1,inplace=True)
 			df['date'] = pd.to_datetime(df.date)
 			df = df[df['away_pts'].notna()]
 			df['date'] = df['date'].dt.strftime('%Y%m%d')

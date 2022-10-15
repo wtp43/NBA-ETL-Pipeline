@@ -3,6 +3,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) +
 import sql_func as sif
 import db_func
 import scrape_historical_data as shd
+import math
 
 import istarmap
 import tqdm
@@ -18,9 +19,9 @@ from pandas.core.frame import DataFrame
 import time
 
 
-POOL_SIZE = 15
+POOL_SIZE = 20
 
-DEBUG = True
+DEBUG = False
 
 def init_child(lock_, connection_required=False):
 	global lock
@@ -100,6 +101,7 @@ def insert_matches(season):
 		sif.copy_to_imports(cur,csv)	
 		conn.commit()
 	except Exception as err:
+		print('no matches')
 		raise err
 
 
@@ -109,9 +111,9 @@ def mproc_matches(cur, seasons):
 	print(f'starting computations on {POOL_SIZE} cores')
 	with Pool(POOL_SIZE, initializer=init_child,initargs=(lock,True)) as pool:
 		for _ in tqdm.tqdm(pool.map(insert_matches, seasons, 
-							chunksize=len(seasons)//POOL_SIZE),
+							chunksize=math.ceil(len(seasons)/POOL_SIZE)),
                            total=len(seasons)):		   
-				pass
+			pass
 	sif.imports_to_match(cur)
 
 
@@ -165,7 +167,7 @@ def mproc_players(cur, seasons):
 	with Pool(POOL_SIZE, initializer=init_child,initargs=(lock,True)) as pool:
 		for _ in tqdm.tqdm(pool.starmap(insert_player, 
 							((key,val) for key, val in endpoints.items()),
-							chunksize=len(endpoints)//POOL_SIZE),
+							chunksize=math.ceil(len(endpoints)/POOL_SIZE)),
                            total=len(endpoints)):		   
 				pass
 	sif.imports_to_player(cur)
@@ -177,7 +179,7 @@ def mproc_boxscores(cur):
 	matches = get_matches()
 	with Pool(POOL_SIZE, initializer=init_child,initargs=(lock,True)) as pool:
 		for _ in tqdm.tqdm(pool.starmap(insert_boxscores, matches, 
-							chunksize=len(matches)//POOL_SIZE),
+							chunksize=math.ceil(len(matches)/POOL_SIZE)),
 							total=len(matches)):
 			pass			
 	sif.imports_to_player_performance(cur)
@@ -306,7 +308,6 @@ def scrape(start_date=1, end_date=1):
 		team_list_path = 'target/NBA_Teams.csv'
 		seasons_path = 'target/seasons.csv'
 		seasons = get_all_seasons(cur)
-		
 		#insert seasons into db if they dont exist
 		if len(seasons) == 0:
 			db_func.truncate_imports(cur)
