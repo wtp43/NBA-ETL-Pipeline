@@ -8,7 +8,7 @@ import db_func as db_func
 import logging
 from pandas.core.frame import DataFrame
 import time
-
+from tqdm.contrib.logging import logging_redirect_tqdm
 DEBUG = False
 pd.options.display.max_columns = None
 pd.options.display.max_rows = None
@@ -356,7 +356,8 @@ def boxscore_to_csv(match_html):
 				df.to_csv(file_path, mode='a',index=False, header=False)
 
 	except Exception as err:
-		logging.error(f"{match_html} boxscore processing failed: {err}")
+		with logging_redirect_tqdm():
+			logging.error(f"{match_html} boxscore processing failed: {err}")
 		raise err
 
 

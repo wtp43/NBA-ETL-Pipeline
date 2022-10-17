@@ -3,15 +3,17 @@ import pandas as pd
 pd.options.display.max_columns = None
 pd.options.display.max_rows = None
 import time
+import sys, os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) + '/db/')
 
 from pysbr import EventsByDateRange, CurrentLines, NBA, Sportsbook, Team, EventsByEventIds
 from datetime import datetime, timedelta
-import postgresdb.db_func as db_func
-import os
+import db_func as db_func
 from os import listdir
 from os.path import isfile, join
 from tqdm import tqdm
-import postgresdb.sql_insert_funcs as sif
+import sql_func as sif
 from pandas.core.frame import DataFrame
 
 import re
@@ -112,7 +114,7 @@ def get_odds(season, start_date, end_date, market_id):
 		drop_columns = ['market id','event id', 'participant score', 'market','event', 
 						'participant id', 'profit', 'result','home_team', 'away_team', 
 						'sportsbook id', 'participant full name', 'home_team_exists',
-						'away_team_exists', 'sportsbook alias']
+						'away_team_exists', 'sportsbook alias', 'team id', 'mtgrp', 'entrid']
 
 		combined.drop([x for x in drop_columns if x in combined.columns], axis=1, inplace=True)
 		combined.to_csv(csv,mode='w+', index=False, header=True)
@@ -138,7 +140,7 @@ def save_odds():
 		get_odds(season, start_date, end_date, 'ps')
 		get_odds(season, start_date, end_date, 'total')
 
-	threaded_postgreSQL_pool.putconn(conn)
+	conn.close()
 
 def insert_odds():
 	conn = db_func.get_conn()
@@ -148,7 +150,7 @@ def insert_odds():
 			   FROM bet_type'''
 	cur.execute(query)
 	if len(cur.fetchall()) == 0:
-		sif.insert_bet_type('db_src/bet_type.csv', cur)
+		sif.insert_bet_type('target/bet_type.csv', cur)
 		conn.commit()
 	db_func.truncate_imports(cur)
 	csvs = [f'csv/odds/{f}' for f in listdir('csv/odds') if isfile(join('csv/odds', f))]
@@ -168,7 +170,7 @@ def insert_odds():
 	sif.imports_to_bets_total(cur)
 
 	conn.commit()
-	threaded_postgreSQL_pool.putconn(conn)
+	conn.close()
 
 #Sportsbookreview is missing odds for certain matches (OKC-Seattle Supersonics and others)
 #They will be filled in using moneyline odds data from sportsbookreviewonline.com
@@ -193,7 +195,7 @@ def fill_missing_odds():
 	sif.fill_missing_odds(cur)
 	
 	conn.commit()
-	threaded_postgreSQL_pool.putconn(conn)
+	conn.close()
 
 def modify_sbro_odds(csv):
 	df = pd.read_csv(csv)
@@ -239,12 +241,9 @@ def vegas_to_decimal(vegas_odds):
 
 
 def main():
-	try:
-		save_odds()
-		insert_odds()
-		fill_missing_odds()
-	except Exception:
-		 os.execv(sys.argv[0], sys.argv)
+	save_odds()
+	insert_odds()
+	fill_missing_odds()
 
 
 if __name__ == '__main__':

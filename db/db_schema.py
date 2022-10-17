@@ -75,7 +75,9 @@ create_imports_table = \
 		bet_type_id		SERIAL,
 		decimal_odds	REAL,
 		vegas_odds		REAL,
-		Notes			TEXT
+		notes			TEXT,
+		entrid 			TEXT,
+		mtgrp			TEXT
 		);'''
 
 create_season_table =\
