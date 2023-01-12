@@ -7,7 +7,7 @@ import sys, os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) + '/db/')
 
-from pysbr import EventsByDateRange, CurrentLines, NBA, Sportsbook, Team, EventsByEventIds
+from pysbr import EventsByDateRange, OpeningLines, NBA, Sportsbook, Team, EventsByEventIds
 from datetime import datetime, timedelta
 import db_func as db_func
 from os import listdir
@@ -59,9 +59,9 @@ def get_away(team):
 	return team_id[team.split('@')[0]]
 
 def get_odds(season, start_date, end_date, market_id):
-	csv = f'csv/odds/{season}_{market_id}.csv'
-	if not os.path.isdir('csv/odds'):
-		os.makedirs('csv/odds')
+	csv = f'csv/opening_odds/{season}_{market_id}.csv'
+	if not os.path.isdir('csv/opening_odds'):
+		os.makedirs('csv/opening_odds')
 	if os.path.isfile(csv):
 		return
 	nba = NBA()
@@ -81,9 +81,10 @@ def get_odds(season, start_date, end_date, market_id):
 		e = EventsByDateRange(nba.league_id, 
 			start_date + timedelta(days=(i-1)*31), 
 			start_date + timedelta(days=i*31))
-		cl = CurrentLines(e.ids(), nba_market_ids, sb_ids)
-		lines_dataframes.append(cl.dataframe(e))
-
+		for id in sb_ids:
+			cl = OpeningLines(e.ids(), nba_market_ids, id)
+			time.sleep(1.2)
+			lines_dataframes.append(cl.dataframe(e))
 	combined = pd.concat(lines_dataframes)
 
 	if not combined.empty:
