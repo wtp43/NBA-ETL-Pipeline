@@ -9,6 +9,7 @@ def main():
 	# 	today = datetime.today().strftime('%Y-%m-%d')
 	# 	yesterday = today - datetime.timedelta(days=1)
 	# 	date_range = [yesterday, today]
+	else:
 	sc.scrape(*date_range)
 		
 if __name__ == "__main__":

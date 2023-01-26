@@ -17,7 +17,7 @@ def insert_bet_type(csv, cur):
 def fill_missing_odds(cur):
 	try:
 		query = \
-		'''INSERT INTO odds
+		'''INSERT INTO opening_odds
 			(datetime, match_id, vegas_odds, sportsbook, team_id, bet_type_id,
 				decimal_odds)
 			SELECT im.datetime, m.match_id, im.vegas_odds, im.sportsbook, 
@@ -30,7 +30,7 @@ def fill_missing_odds(cur):
 					t1.team_id = m.away_id)
 				AND (im.bet_type_id = 1)
 				AND NOT EXISTS (
-					SELECT * FROM odds AS o
+					SELECT * FROM opening_odds AS o
 					WHERE m.match_id = o.match_id
 						AND t1.team_id = o.team_id
 						AND im.bet_type_id = 1
@@ -42,7 +42,7 @@ def fill_missing_odds(cur):
 def imports_to_bets(cur):
 	try:
 		query = \
-		'''INSERT INTO odds
+		'''INSERT INTO opening_odds
 			(datetime, match_id, spread, decimal_odds, vegas_odds,
 			 sportsbook, team_id, bet_type_id)
 			SELECT im.datetime, m.match_id, im.spread, im.decimal_odds,
@@ -64,7 +64,7 @@ def imports_to_bets(cur):
 
 				AND (im.bet_type_id = 1 OR im.bet_type_id = 2)
 				AND NOT EXISTS (
-					SELECT * FROM odds AS o
+					SELECT * FROM opening_odds AS o
 					WHERE m.match_id = o.match_id
 					AND t3.team_id = o.team_id
 					AND im.sportsbook = o.sportsbook
@@ -80,7 +80,7 @@ def imports_to_bets(cur):
 def imports_to_bets_total(cur):
 	try:
 		query = \
-		'''INSERT INTO odds
+		'''INSERT INTO opening_odds
 			(datetime, match_id, spread, decimal_odds, vegas_odds,
 			 sportsbook, over_under, bet_type_id)
 			SELECT im.datetime, m.match_id, im.spread, im.decimal_odds,
@@ -100,7 +100,7 @@ def imports_to_bets_total(cur):
 
 				AND im.bet_type_id = 3
 				AND NOT EXISTS (
-					SELECT * FROM odds AS o
+					SELECT * FROM opening_odds AS o
 					WHERE m.match_id = o.match_id
 					AND im.team_abbr = o.over_under
 					AND im.sportsbook = o.sportsbook

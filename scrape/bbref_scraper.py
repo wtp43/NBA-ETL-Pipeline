@@ -17,9 +17,10 @@ import itertools
 import csv
 from pandas.core.frame import DataFrame
 import time
+from tqdm.contrib.logging import logging_redirect_tqdm
 
 
-POOL_SIZE = 20
+POOL_SIZE = cpu_count() - 1
 
 DEBUG = False
 
@@ -165,7 +166,7 @@ def mproc_players(cur, seasons):
 	lock = Lock()
 
 	with Pool(POOL_SIZE, initializer=init_child,initargs=(lock,True)) as pool:
-		for _ in tqdm.tqdm(pool.starmap(insert_player, 
+		for _ in tqdm.tqdm(pool.istarmap(insert_player, 
 							((key,val) for key, val in endpoints.items()),
 							chunksize=math.ceil(len(endpoints)/POOL_SIZE)),
                            total=len(endpoints)):		   
@@ -178,9 +179,10 @@ def mproc_boxscores(cur):
 	lock = Lock()
 	matches = get_matches()
 	with Pool(POOL_SIZE, initializer=init_child,initargs=(lock,True)) as pool:
-		for _ in tqdm.tqdm(pool.starmap(insert_boxscores, matches, 
+		for _ in tqdm.tqdm(pool.istarmap(insert_boxscores, matches, 
 							chunksize=math.ceil(len(matches)/POOL_SIZE)),
-							total=len(matches)):
+							total=len(matches),
+							position=0):
 			pass			
 	sif.imports_to_player_performance(cur)
 
@@ -199,8 +201,9 @@ def insert_boxscores(date, home_abbr):
 		csv = os.path.join(os.getcwd(),"csv/boxscores/"+bbref_endpoint+".csv")
 		sif.copy_to_imports(cur,csv)
 		conn.commit()
-	except Exception as err:	
-		logging.error(bbref_endpoint+" boxscore processing failed")
+	except Exception as err:
+		with logging_redirect_tqdm():
+			logging.error(bbref_endpoint+" boxscore processing failed")
 	return
 
 
@@ -278,7 +281,7 @@ def mproc_player_endpoints(seasons):
 		for s in seasons:
 			teams = get_teams(cur, s)
 			with Pool(POOL_SIZE, initializer=init_child,initargs=(lock,)) as pool:
-				for _ in tqdm.tqdm(pool.starmap(save_player_endpoints, 
+				for _ in tqdm.tqdm(pool.istarmap(save_player_endpoints, 
 									list(itertools.product(teams, [s]))),
 									total=len(teams)):
 					pass
@@ -291,7 +294,7 @@ def mproc_player_endpoints(seasons):
 def scrape(start_date=1, end_date=1):
 	if not os.path.isdir("logs"):
 		os.makedirs("logs")
-	logging.basicConfig(level=logging.DEBUG, 
+	logging.basicConfig(level=logging.INFO, 
 						format= '[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s',
      					datefmt='%Y-%m-%d %H:%M:%S',
 						handlers=[

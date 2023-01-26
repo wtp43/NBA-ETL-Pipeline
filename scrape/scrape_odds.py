@@ -154,7 +154,7 @@ def insert_odds():
 		sif.insert_bet_type('target/bet_type.csv', cur)
 		conn.commit()
 	db_func.truncate_imports(cur)
-	csvs = [f'csv/odds/{f}' for f in listdir('csv/odds') if isfile(join('csv/odds', f))]
+	csvs = [f'csv/opening_odds/{f}' for f in listdir('csv/opening_odds') if isfile(join('csv/opening_odds', f))]
 	for csv in tqdm(csvs, colour='red', position=1):
 		sif.copy_to_imports(cur,csv)
 	conn.commit()
@@ -164,10 +164,8 @@ def insert_odds():
 
 	sif.imports_to_bets(cur)
 	conn.commit()
-	query = '''ANALYZE odds'''
+	query = '''ANALYZE opening_odds'''
 	db_func.exec_query(conn, query)
-
-
 	sif.imports_to_bets_total(cur)
 
 	conn.commit()

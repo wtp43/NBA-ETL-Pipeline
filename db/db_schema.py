@@ -185,7 +185,7 @@ create_bet_type_table = \
 		);'''
 
 create_odds_table = \
-	'''CREATE TABLE IF NOT EXISTS odds(
+	'''CREATE TABLE IF NOT EXISTS opening_odds(
 		match_id		SERIAL						NOT NULL,
 		team_id			SERIAL						NOT NULL,
 		over_under		TEXT						,
@@ -197,7 +197,7 @@ create_odds_table = \
 		vegas_odds		REAL						NOT NULL,
 		
 		PRIMARY KEY(match_id, sportsbook, bet_type_id, 
-					team_id, datetime),
+					team_id, datetime, spread),
 		FOREIGN KEY(match_id) REFERENCES match,
 		FOREIGN KEY(bet_type_id) REFERENCES bet_type
 		);'''
